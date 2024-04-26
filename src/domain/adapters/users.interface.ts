@@ -1,5 +1,6 @@
-export interface IUser {
-  id: number;
+import { IBase } from './base.interface';
+
+export interface IUser extends IBase {
   user_name: string;
   email: string;
   phone_number: string;
@@ -9,7 +10,5 @@ export interface IUser {
   verified: boolean;
   verificationToken?: string;
   resetToken?: string;
-  created_at: string;
-  updated_at: string;
   orders: any[];
 }

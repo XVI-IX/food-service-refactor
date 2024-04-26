@@ -1,4 +1,4 @@
-export interface IVendors {
+export interface IVendors extends I {
   id: number;
   name: string;
   email: string;
