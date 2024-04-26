@@ -1,4 +1,5 @@
 export interface IEnvironmentInterface {
+  getEnvironment(): string;
   getPort(): number;
   getURL(): string;
   getAdminMail(): string;
