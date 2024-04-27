@@ -1,5 +1,6 @@
-export interface IVendors extends I {
-  id: number;
+import { IBase } from './base.interface';
+
+export interface IVendors extends IBase {
   name: string;
   email: string;
   password?: string;
@@ -11,6 +12,4 @@ export interface IVendors extends I {
   role: string;
   stores: any[];
   orders: any[];
-  created_at: string;
-  updated_at: string;
 }

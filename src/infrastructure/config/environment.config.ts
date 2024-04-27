@@ -24,6 +24,38 @@ class EnvironmentConfig implements IEnvironmentInterface {
   getResetSecret(): string {
     return env.get('RESET_SECRET').asString();
   }
+
+  getEmailHost(): string {
+    return env.get('EMAIL_HOST').asString();
+  }
+
+  getAdminMail(): string {
+    return env.get('ADMIN_MAIL').asString();
+  }
+
+  getEmailPassword(): string {
+    return env.get('EMAIL_PASS').asString();
+  }
+
+  getEmailPort(): string {
+    return env.get('EMAIL_PORT').asString();
+  }
+
+  getEmailUsername(): string {
+    return env.get('EMAIL_USER').asString();
+  }
+
+  getDatabaseUrl(): string {
+    return env.get('DATABASE_URL').asString();
+  }
+
+  getPaystackKey(): string {
+    return env.get('PAYSTACK_KEY').asString();
+  }
+
+  getPaystackUrl(): string {
+    return env.get('PAYSTACK_URL').asString();
+  }
 }
 
 export const envConfig = new EnvironmentConfig();

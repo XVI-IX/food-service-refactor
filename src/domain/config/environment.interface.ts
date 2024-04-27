@@ -9,4 +9,6 @@ export interface IEnvironmentInterface {
   getEmailPort(): string;
   getEmailPassword(): string;
   getEmailUsername(): string;
+  getDatabaseUrl(): string;
+  getPaystackKey(): string;
 }
