@@ -1,0 +1,91 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum userRole {
+  customer
+  vendor
+}
+
+enum genericStatus {
+  pending
+  accepted
+}
+
+model users {
+  id                Int           @id @default(autoincrement())
+  userName          String
+  firstName         String
+  otherName         String?
+  lastName          String
+  phone             String
+  password          String
+  google_id         String?
+  role              userRole      @default(customer)
+  verified          Boolean       @default(false)
+  verificationToken String?       @unique
+  resetToken        String?
+  createdAt         DateTime      @default(now()) @db.Timestamp(6)
+  updatedAt         DateTime      @updatedAt
+  status            genericStatus @default(pending)
+  businessAddress   String?
+  recipientCode     String?
+  stores            stores[]
+}
+
+model stores {
+  id                        Int           @id @default(autoincrement())
+  user                      users         @relation(fields: [userId], references: [id])
+  userId                    Int
+  name                      String
+  address                   String
+  phone                     String
+  email                     String
+  instagramUrl              String?
+  facebookUrl               String?
+  xUrl                      String?
+  youtubeUrl                String?
+  description               String
+  openingHours              String?
+  deliveryRadius            Float?
+  deliveryFee               Float?        @default(0)
+  minOrderAmountForDelivery Float?        @default(0)
+  latitude                  Float?
+  longitude                 Float?
+  active                    Boolean?      @default(false)
+  status                    genericStatus @default(pending)
+  createdAt                 DateTime      @default(now()) @db.Timestamp(6)
+  updatedAt                 DateTime      @updatedAt
+  avgRating                 Float?
+  totalReviews              Int?
+  isOpen                    Boolean?      @default(true)
+  items                     items[]
+}
+
+model items {
+  id          Int      @id @default(autoincrement())
+  store       stores   @relation(fields: [storeId], references: [id])
+  storeId     Int
+  name        String   @db.VarChar(255)
+  description String   @db.Text()
+  price       Float
+  ingredients String[]
+  calories    Float?
+  fatContent  Float?
+  portionSize String?
+  allergens   String[]
+  tags        String[]
+  createdAt   DateTime @default(now()) @db.Timestamp(6)
+  updatedAt   DateTime @updatedAt
+}

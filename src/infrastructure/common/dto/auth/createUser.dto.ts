@@ -1,5 +1,6 @@
 import {
   IsEmail,
+  IsIn,
   IsNotEmpty,
   IsOptional,
   IsPhoneNumber,
@@ -28,4 +29,9 @@ export class CreateUserDto {
   @IsString()
   @IsOptional()
   google_id?: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @IsIn(['customer', 'vendor'])
+  role: string;
 }
