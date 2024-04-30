@@ -23,8 +23,37 @@ enum genericStatus {
   accepted
 }
 
+enum OrderStatusEnum {
+  placed
+  confirmed
+  in_progress
+  out_for_delivery
+  delivered
+  cancelled
+}
+
+enum OrderTypeEnum {
+  delivery
+  pickup
+  dine_in
+}
+
+enum OrderEventTypeEnum {
+  status_change
+  modification
+  cancellation
+}
+
+enum PaymentStatusEnum {
+  pending
+  success
+  failed
+  reversed
+  cancelled
+}
+
 model users {
-  id                Int           @id @default(autoincrement())
+  id                Int            @id @default(autoincrement())
   userName          String
   firstName         String
   otherName         String?
@@ -32,16 +61,18 @@ model users {
   phone             String
   password          String
   google_id         String?
-  role              userRole      @default(customer)
-  verified          Boolean       @default(false)
-  verificationToken String?       @unique
+  role              userRole       @default(customer)
+  verified          Boolean        @default(false)
+  verificationToken String?        @unique
   resetToken        String?
-  createdAt         DateTime      @default(now()) @db.Timestamp(6)
-  updatedAt         DateTime      @updatedAt
-  status            genericStatus @default(pending)
+  createdAt         DateTime       @default(now()) @db.Timestamp(6)
+  updatedAt         DateTime       @updatedAt
+  status            genericStatus  @default(pending)
   businessAddress   String?
   recipientCode     String?
   stores            stores[]
+  orders            orders[]
+  orderHistory      orderHistory[]
 }
 
 model stores {
@@ -71,14 +102,15 @@ model stores {
   totalReviews              Int?
   isOpen                    Boolean?      @default(true)
   items                     items[]
+  orders                    orders[]
 }
 
 model items {
-  id          Int      @id @default(autoincrement())
-  store       stores   @relation(fields: [storeId], references: [id])
+  id          Int          @id @default(autoincrement())
+  store       stores       @relation(fields: [storeId], references: [id])
   storeId     Int
-  name        String   @db.VarChar(255)
-  description String   @db.Text()
+  name        String       @db.VarChar(255)
+  description String       @db.Text()
   price       Float
   ingredients String[]
   calories    Float?
@@ -86,6 +118,82 @@ model items {
   portionSize String?
   allergens   String[]
   tags        String[]
-  createdAt   DateTime @default(now()) @db.Timestamp(6)
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime     @default(now()) @db.Timestamp(6)
+  updatedAt   DateTime     @updatedAt
+  orderItems  orderItems[]
+}
+
+model orders {
+  id                    Int             @id @default(autoincrement())
+  user                  users           @relation(fields: [userId], references: [id])
+  userId                Int
+  store                 stores          @relation(fields: [storeId], references: [id])
+  storeId               Int
+  deliveryLocation      String
+  deliveryStatus        OrderStatusEnum @default(placed)
+  orderReference        String          @unique @default(uuid())
+  deliveryInstructions  String?         @db.Text
+  subTotalPrice         Float
+  paymentMethod         String?
+  estimatedDeliveryTime DateTime?
+  feedback              String?
+  rating                Float?
+  promoCode             String?
+  cancellationReason    String?
+  taxAmount             String?
+  deliveryFee           String?
+  timeslot              timeslots       @relation(fields: [timeslotId], references: [id])
+  timeslotId            Int
+  orderHistory          orderHistory[]
+  orderItems            orderItems[]
+  payments              payments[]
+}
+
+model orderHistory {
+  id        Int                @id @default(autoincrement())
+  order     orders             @relation(fields: [orderId], references: [id])
+  orderId   Int
+  eventType OrderEventTypeEnum @default(status_change)
+  timestamp DateTime           @default(now()) @db.Timestamp(6)
+  actor     users              @relation(fields: [actorId], references: [id])
+  actorId   Int
+  details   String?
+}
+
+model orderItems {
+  id             Int    @id @default(autoincrement())
+  order          orders @relation(fields: [orderId], references: [id])
+  orderId        Int
+  item           items  @relation(fields: [itemId], references: [id])
+  itemId         Int
+  quantity       Int    @default(1)
+  totalItemPrice Float?
+  price          Float
+}
+
+model timeslots {
+  id              Int      @id @default(autoincrement())
+  startTime       DateTime @db.Timestamp(6)
+  endTime         DateTime @db.Timestamp(6)
+  timezone        String
+  orderCount      Int      @default(0)
+  currentCapacity Int      @default(0)
+  isAvailable     Boolean  @default(true)
+  orders          orders[]
+
+  @@unique([startTime, endTime])
+}
+
+model payments {
+  id              Int                @id @default(autoincrement())
+  reference       String             @unique
+  transactionId   String?
+  order           orders             @relation(fields: [orderId], references: [id])
+  orderId         Int
+  paymentStatus   PaymentStatusEnum? @default(pending)
+  amount          Float?             @default(0)
+  paymentDate     DateTime?
+  gatewayResponse Json?
+  createdAt       DateTime           @default(now()) @db.Timestamp(6)
+  updatedAt       DateTime           @updatedAt @db.Timestamp(6)
 }
