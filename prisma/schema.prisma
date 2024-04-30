@@ -103,6 +103,7 @@ model stores {
   isOpen                    Boolean?      @default(true)
   items                     items[]
   orders                    orders[]
+  payments                  payments[]
 }
 
 model items {
@@ -158,6 +159,8 @@ model orderHistory {
   actor     users              @relation(fields: [actorId], references: [id])
   actorId   Int
   details   String?
+  createdAt DateTime           @default(now()) @db.Timestamp()
+  updatedAt DateTime           @updatedAt
 }
 
 model orderItems {
@@ -190,6 +193,8 @@ model payments {
   transactionId   String?
   order           orders             @relation(fields: [orderId], references: [id])
   orderId         Int
+  store           stores             @relation(fields: [storeId], references: [id])
+  storeId         Int
   paymentStatus   PaymentStatusEnum? @default(pending)
   amount          Float?             @default(0)
   paymentDate     DateTime?

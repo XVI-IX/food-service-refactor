@@ -5,17 +5,12 @@ import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
 @Injectable()
 export class AuthService {
   private logger: Logger;
-  constructor(
-    private readonly prisma: PrismaService
-  ) {
+  constructor(private readonly prisma: PrismaService) {
     this.logger = new Logger(AuthService.name);
   }
 
-  async register (dto: CreateUserDto) {
+  async register(dto: CreateUserDto) {
     try {
-      
-    } catch (error) {
-      
-    }
+    } catch (error) {}
   }
 }
