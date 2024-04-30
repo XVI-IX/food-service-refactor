@@ -11,4 +11,5 @@ export interface IEnvironmentInterface {
   getEmailUsername(): string;
   getDatabaseUrl(): string;
   getPaystackKey(): string;
+  getJwtExpiration(): string;
 }

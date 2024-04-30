@@ -21,6 +21,10 @@ class EnvironmentConfig implements IEnvironmentInterface {
     return env.get('URL').asString();
   }
 
+  getJwtExpiration(): string {
+    return env.get('JWT_EXPIRATION').asString();
+  }
+
   getResetSecret(): string {
     return env.get('RESET_SECRET').asString();
   }

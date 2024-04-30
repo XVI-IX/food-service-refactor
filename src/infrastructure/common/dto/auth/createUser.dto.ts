@@ -1,37 +1,55 @@
 import {
   IsEmail,
+  IsEnum,
   IsIn,
   IsNotEmpty,
   IsOptional,
-  IsPhoneNumber,
   IsString,
 } from 'class-validator';
+
+enum Role {
+  customer,
+  vendor,
+}
 
 export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
-  user_name: string;
+  userName: string;
 
   @IsString()
-  @IsEmail()
   @IsNotEmpty()
+  firstName: string;
+
+  @IsOptional()
+  @IsString()
+  otherName?: string;
+
+  @IsString()
+  @IsNotEmpty()
+  lastName?: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @IsEmail()
   email: string;
 
   @IsString()
   @IsNotEmpty()
-  @IsPhoneNumber()
-  phone_number: string;
+  phone: string;
 
   @IsString()
   @IsNotEmpty()
   password: string;
 
   @IsString()
-  @IsOptional()
+  @IsNotEmpty()
   google_id?: string;
 
+  @IsEnum(Role)
+  role: any;
+
   @IsString()
-  @IsNotEmpty()
-  @IsIn(['customer', 'vendor'])
-  role: string;
+  @IsOptional()
+  businessAddress?: string;
 }

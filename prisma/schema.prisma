@@ -59,15 +59,17 @@ model users {
   otherName         String?
   lastName          String
   phone             String
+  email             String @unique
   password          String
   google_id         String?
   role              userRole       @default(customer)
   verified          Boolean        @default(false)
   verificationToken String?        @unique
   resetToken        String?
+  resetTokenExpiration String?
   createdAt         DateTime       @default(now()) @db.Timestamp(6)
   updatedAt         DateTime       @updatedAt
-  status            genericStatus  @default(pending)
+  status            genericStatus?  @default(pending)
   businessAddress   String?
   recipientCode     String?
   stores            stores[]
