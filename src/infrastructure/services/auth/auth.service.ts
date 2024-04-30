@@ -141,6 +141,24 @@ export class AuthService {
           success: true,
         };
       }
+
+      const payload = {
+        sub: checkExists.id,
+        email: checkExists.email,
+      };
+      const token = await this.jwt.signAsync(payload, {
+        secret: envConfig.getJWTSecret(),
+        expiresIn: envConfig.getJwtExpiration(),
+      });
+
+      return {
+        message: 'Authentication successful',
+        data: {
+          ...checkExists,
+          token,
+        },
+        success: true,
+      };
     } catch (error) {
       this.logger.error(error);
       throw error;
@@ -156,7 +174,7 @@ export class AuthService {
         email: checkExists.email,
       };
 
-      const resetToken = await this.jwt.sign(payload, {
+      const resetToken = this.jwt.sign(payload, {
         secret: envConfig.getResetSecret,
         expiresIn: envConfig.getJwtExpiration,
       });
@@ -186,6 +204,15 @@ export class AuthService {
         data: null,
         success: true,
       };
+    } catch (error) {
+      this.logger.error(error);
+      throw error;
+    }
+  }
+
+  async resetPassword() {
+    try {
+      
     } catch (error) {
       this.logger.error(error);
       throw error;
