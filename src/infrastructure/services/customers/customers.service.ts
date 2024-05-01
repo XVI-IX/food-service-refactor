@@ -28,7 +28,7 @@ export class CustomerService {
    * @param page Present page number for pagination
    * @returns {Promise<ServiceInterface>}
    */
-  async getAllCustomers(page: number): Promise<ServiceInterface> {
+  async getAllCustomers(page: number = 1): Promise<ServiceInterface> {
     try {
       const customers = await this.prisma.users.findMany({
         where: {
