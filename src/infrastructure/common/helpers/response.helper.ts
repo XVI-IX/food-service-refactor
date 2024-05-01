@@ -3,11 +3,12 @@ import { ServiceInterface } from 'src/domain/adapters';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 
 export class HttpResponse {
-  static send<T = any, U = any>(message: string, data: ServiceInterface<T, U>) {
+  static send<T = any>(message: string, data: ServiceInterface<T>) {
     return {
       status: true,
       message,
       data: data && data.data ? data.data : UUID,
+      page: data && data.page ? data.page : 1,
     };
   }
 

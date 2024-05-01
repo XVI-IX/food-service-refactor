@@ -1,3 +1,4 @@
-export interface ServiceInterface<T = any, U = any> {
+export interface ServiceInterface<T = any> {
   data?: T;
+  page?: number;
 }

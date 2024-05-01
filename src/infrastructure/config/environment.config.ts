@@ -60,6 +60,10 @@ class EnvironmentConfig implements IEnvironmentInterface {
   getPaystackUrl(): string {
     return env.get('PAYSTACK_URL').asString();
   }
+
+  getPaginationLimit(): number {
+    return env.get('PAGINATION_LIMIT').asInt();
+  }
 }
 
 export const envConfig = new EnvironmentConfig();

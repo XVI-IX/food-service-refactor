@@ -12,4 +12,5 @@ export interface IEnvironmentInterface {
   getDatabaseUrl(): string;
   getPaystackKey(): string;
   getJwtExpiration(): string;
+  getPaginationLimit(): number;
 }

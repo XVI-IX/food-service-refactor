@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   InternalServerErrorException,
   Logger,
@@ -12,7 +13,7 @@ import * as argon from 'argon2';
 import { randomBytes } from 'crypto';
 import { IEmail } from 'src/domain/adapters/email.interface';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { LoginUserDto } from 'src/infrastructure/common/dto';
+import { LoginUserDto, ResetPasswordDto } from 'src/infrastructure/common/dto';
 import { JwtService } from '@nestjs/jwt';
 import { envConfig } from 'src/infrastructure/config/environment.config';
 
@@ -48,7 +49,7 @@ export class AuthService {
 
   async register(dto: CreateUserDto) {
     try {
-      const checkExists = await this.checkUser(dto.email);
+      await this.checkUser(dto.email);
 
       const passwordHash = await argon.hash(dto.password);
       const verificationToken = this.generateOTP();
@@ -174,7 +175,7 @@ export class AuthService {
         email: checkExists.email,
       };
 
-      const resetToken = this.jwt.sign(payload, {
+      const resetToken = await this.jwt.signAsync(payload, {
         secret: envConfig.getResetSecret,
         expiresIn: envConfig.getJwtExpiration,
       });
@@ -210,9 +211,51 @@ export class AuthService {
     }
   }
 
-  async resetPassword() {
+  async resetPassword(token: string, dto: ResetPasswordDto) {
     try {
-      
+      const userExists = await this.prisma.users.findUnique({
+        where: {
+          email: dto.email,
+        },
+      });
+
+      if (!userExists) {
+        throw new NotFoundException('User with email address does not exist');
+      }
+
+      if (token === userExists.resetToken) {
+        const tokenValid = await this.jwt.verifyAsync(token, {
+          secret: envConfig.getJWTSecret(),
+        });
+
+        if (!tokenValid) {
+          throw new ForbiddenException('Token expired or invalid');
+        }
+      }
+
+      const hash = await argon.hash(dto.newPassword);
+
+      const updatedUser = await this.prisma.users.update({
+        where: {
+          email: dto.email,
+        },
+        data: {
+          password: hash,
+          resetToken: null,
+        },
+      });
+
+      if (!updatedUser) {
+        throw new InternalServerErrorException(
+          `resetPassword: Password could not be reset`,
+        );
+      }
+
+      return {
+        message: 'Password reset successfully',
+        data: updatedUser,
+        success: true,
+      };
     } catch (error) {
       this.logger.error(error);
       throw error;
