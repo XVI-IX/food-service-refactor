@@ -7,6 +7,7 @@ import {
 import { stores } from '@prisma/client';
 import { ServiceInterface } from 'src/domain/adapters';
 import { CreateStoreDto } from 'src/infrastructure/common/dto';
+import { UpdateStoreDto } from 'src/infrastructure/common/dto/stores/updateStore.dto';
 import { envConfig } from 'src/infrastructure/config/environment.config';
 import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
 

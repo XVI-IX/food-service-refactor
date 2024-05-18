@@ -53,33 +53,33 @@ enum PaymentStatusEnum {
 }
 
 model users {
-  id                Int            @id @default(autoincrement())
-  userName          String
-  firstName         String
-  otherName         String?
-  lastName          String
-  phone             String
-  email             String @unique
-  password          String
-  google_id         String?
-  role              userRole       @default(customer)
-  verified          Boolean        @default(false)
-  verificationToken String?        @unique
-  resetToken        String?
+  id                   Int            @id @default(autoincrement())
+  userName             String
+  firstName            String
+  otherName            String?
+  lastName             String
+  phone                String
+  email                String         @unique
+  password             String
+  google_id            String?
+  role                 userRole       @default(customer)
+  verified             Boolean        @default(false)
+  verificationToken    String?        @unique
+  resetToken           String?
   resetTokenExpiration String?
-  createdAt         DateTime       @default(now()) @db.Timestamp(6)
-  updatedAt         DateTime       @updatedAt
-  status            genericStatus?  @default(pending)
-  businessAddress   String?
-  recipientCode     String?
-  stores            stores[]
-  orders            orders[]
-  orderHistory      orderHistory[]
+  createdAt            DateTime       @default(now()) @db.Timestamp(6)
+  updatedAt            DateTime       @updatedAt
+  status               genericStatus? @default(pending)
+  businessAddress      String?
+  recipientCode        String?
+  stores               stores[]
+  orders               orders[]
+  orderHistory         orderHistory[]
 }
 
 model stores {
-  id                        Int           @id @default(autoincrement())
-  user                      users         @relation(fields: [userId], references: [id])
+  id                        Int            @id @default(autoincrement())
+  user                      users          @relation(fields: [userId], references: [id])
   userId                    Int
   name                      String
   address                   String
@@ -92,20 +92,20 @@ model stores {
   description               String
   openingHours              String?
   deliveryRadius            Float?
-  deliveryFee               Float?        @default(0)
-  minOrderAmountForDelivery Float?        @default(0)
+  deliveryFee               Float?         @default(0)
+  minOrderAmountForDelivery Float?         @default(0)
   latitude                  Float?
   longitude                 Float?
-  active                    Boolean?      @default(false)
-  status                    genericStatus @default(pending)
-  createdAt                 DateTime      @default(now()) @db.Timestamp(6)
-  updatedAt                 DateTime      @updatedAt
+  active                    Boolean?       @default(false)
+  status                    genericStatus  @default(pending)
+  createdAt                 DateTime       @default(now()) @db.Timestamp(6)
+  updatedAt                 DateTime       @updatedAt
   avgRating                 Float?
   totalReviews              Int?
-  isOpen                    Boolean?      @default(true)
+  isOpen                    Boolean?       @default(true)
   items                     items[]
   orders                    orders[]
-  payments                  payments[]
+  transactions              transactions[]
 }
 
 model items {
@@ -149,7 +149,7 @@ model orders {
   timeslotId            Int
   orderHistory          orderHistory[]
   orderItems            orderItems[]
-  payments              payments[]
+  transactions          transactions[]
 }
 
 model orderHistory {
@@ -181,24 +181,25 @@ model timeslots {
   startTime       DateTime @db.Timestamp(6)
   endTime         DateTime @db.Timestamp(6)
   timezone        String
-  orderCount      Int      @default(0)
-  currentCapacity Int      @default(0)
+  orderCount      Int?      @default(0)
+  currentCapacity Int?      @default(0)
   isAvailable     Boolean  @default(true)
   orders          orders[]
 
   @@unique([startTime, endTime])
 }
 
-model payments {
+model transactions {
   id              Int                @id @default(autoincrement())
-  reference       String             @unique
-  transactionId   String?
-  order           orders             @relation(fields: [orderId], references: [id])
-  orderId         Int
-  store           stores             @relation(fields: [storeId], references: [id])
-  storeId         Int
+  description     String?       
+  reference       String?             @unique
+  order           orders?            @relation(fields: [orderId], references: [id])
+  orderId         Int?
+  store           stores?            @relation(fields: [storeId], references: [id])
+  storeId         Int?
   paymentStatus   PaymentStatusEnum? @default(pending)
   amount          Float?             @default(0)
+  transactionType String             @default("trasacio")
   paymentDate     DateTime?
   gatewayResponse Json?
   createdAt       DateTime           @default(now()) @db.Timestamp(6)

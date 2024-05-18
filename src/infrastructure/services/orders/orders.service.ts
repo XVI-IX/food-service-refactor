@@ -5,7 +5,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { orders } from '@prisma/client';
+import { orderItems, orders } from '@prisma/client';
 import { ServiceInterface } from 'src/domain/adapters';
 import { UpdateOrderDto } from 'src/infrastructure/common/dto';
 import { envConfig } from 'src/infrastructure/config/environment.config';
@@ -91,6 +91,40 @@ export class OrderService {
       return {
         data: storeOrders,
         page,
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw error;
+    }
+  }
+
+  async getOrderItems(
+    orderId: number,
+  ): Promise<ServiceInterface<orderItems[]>> {
+    try {
+      const orderItems = await this.prisma.orderItems.findMany({
+        where: {
+          orderId: orderId,
+        },
+        select: {
+          id: true,
+          item: true,
+          orderId: true,
+          itemId: true,
+          quantity: true,
+          totalItemPrice: true,
+          price: true,
+        },
+      });
+
+      if (!orderItems) {
+        throw new InternalServerErrorException(
+          'Order items could not be retrieved',
+        );
+      }
+
+      return {
+        data: orderItems,
       };
     } catch (error) {
       this.logger.error(error);
