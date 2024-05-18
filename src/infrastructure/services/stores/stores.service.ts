@@ -64,8 +64,8 @@ export class StoreService {
   async getAllStores(page: number = 1): Promise<ServiceInterface<stores[]>> {
     try {
       const stores = await this.prisma.stores.findMany({
-        skip: (page - 1)* envConfig.getPaginationLimit(),
-        take: envConfig.getPaginationLimit()
+        skip: (page - 1) * envConfig.getPaginationLimit(),
+        take: envConfig.getPaginationLimit(),
       });
 
       if (!stores) {
@@ -74,32 +74,37 @@ export class StoreService {
 
       return {
         data: stores,
-        page
-      }
+        page,
+      };
     } catch (error) {
       this.logger.error(error);
       throw error;
     }
   }
 
-  async getAllUserStores(userId: number, page: number = 1): Promise<ServiceInterface<stores[]>> {
+  async getAllUserStores(
+    userId: number,
+    page: number = 1,
+  ): Promise<ServiceInterface<stores[]>> {
     try {
       const userStores = await this.prisma.stores.findMany({
         where: {
-          userId: userId
+          userId: userId,
         },
         skip: (page - 1) * envConfig.getPaginationLimit(),
-        take: envConfig.getPaginationLimit();
+        take: envConfig.getPaginationLimit(),
       });
 
       if (userStores) {
-        throw new InternalServerErrorException('User stores could not be retrieved')
+        throw new InternalServerErrorException(
+          'User stores could not be retrieved',
+        );
       }
 
       return {
         data: userStores,
-        page
-      }
+        page,
+      };
     } catch (error) {
       this.logger.error(error);
       throw error;
@@ -110,8 +115,8 @@ export class StoreService {
     try {
       const store = await this.prisma.stores.findUnique({
         where: {
-          id: storeId
-        }
+          id: storeId,
+        },
       });
 
       if (!store) {
@@ -119,21 +124,24 @@ export class StoreService {
       }
 
       return {
-        data: store
-      }
+        data: store,
+      };
     } catch (error) {
       this.logger.error(error);
       throw error;
     }
   }
 
-  async updateStore(storeId: number, dto: UpdateStoreDto): Promise<ServiceInterface<stores>> {
+  async updateStore(
+    storeId: number,
+    dto: UpdateStoreDto,
+  ): Promise<ServiceInterface<stores>> {
     try {
       const updatedStore = await this.prisma.stores.update({
         where: {
-          id: storeId
+          id: storeId,
         },
-        data: dto
+        data: dto,
       });
 
       if (!updatedStore) {
@@ -141,19 +149,32 @@ export class StoreService {
       }
 
       return {
-        data: updatedStore
-      }
+        data: updatedStore,
+      };
     } catch (error) {
       this.logger.error(error);
       throw error;
     }
   }
 
-  async deleteStore(storeID: number): Promise<ServiceInterface<stores>>{
+  async deleteStore(storeID: number): Promise<ServiceInterface<stores>> {
     try {
-      
+      const store = await this.prisma.stores.delete({
+        where: {
+          id: storeID,
+        },
+      });
+
+      if (!store) {
+        throw new InternalServerErrorException('Store could not be deleted.');
+      }
+
+      return {
+        data: store,
+      };
     } catch (error) {
-      
+      this.logger.error(error);
+      throw error;
     }
   }
 }
