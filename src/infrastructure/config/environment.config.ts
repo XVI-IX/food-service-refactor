@@ -41,8 +41,8 @@ class EnvironmentConfig implements IEnvironmentInterface {
     return env.get('EMAIL_PASS').asString();
   }
 
-  getEmailPort(): string {
-    return env.get('EMAIL_PORT').asString();
+  getEmailPort(): any {
+    return env.get('EMAIL_PORT').asPortNumber();
   }
 
   getEmailUsername(): string {
