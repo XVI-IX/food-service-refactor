@@ -17,7 +17,7 @@ export class CreateOrderDto {
 
   @IsNotEmpty()
   @IsString()
-  deliveryStatus: string;
+  deliveryStatus: any;
 
   @IsNotEmpty()
   @IsString()

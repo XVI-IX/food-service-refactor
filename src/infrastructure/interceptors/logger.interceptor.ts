@@ -41,7 +41,8 @@ export class LoggingInterceptor implements NestInterceptor {
     let ip: string;
     const ipAddr = request.headers['x-forwarded-for'];
     if (ipAddr) {
-      const list = ipAddr.split(',');
+      console.log(ipAddr)
+      const list = ipAddr;
       ip = list[list.length - 1];
     } else {
       ip = request.connection.remoteAddress;

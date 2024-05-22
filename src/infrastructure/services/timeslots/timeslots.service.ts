@@ -7,7 +7,10 @@ import {
 } from '@nestjs/common';
 import { timeslots } from '@prisma/client';
 import { ServiceInterface } from 'src/domain/adapters';
-import { UpdateTimeslotDto } from 'src/infrastructure/common/dto';
+import {
+  CreateTimeslotDto,
+  UpdateTimeslotDto,
+} from 'src/infrastructure/common/dto';
 import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
 
 @Injectable()
@@ -16,6 +19,34 @@ export class TimeslotService {
 
   constructor(private readonly prisma: PrismaService) {
     this.logger = new Logger(TimeslotService.name);
+  }
+
+  async createTimeslot(
+    dto: CreateTimeslotDto,
+  ): Promise<ServiceInterface<timeslots>> {
+    try {
+      const timeslot = await this.prisma.timeslots.create({
+        data: {
+          startTime: dto.startTime,
+          endTime: dto.endTime,
+          currentCapacity: dto.currentCapacity,
+          orderCount: dto.orderCount,
+          isAvailable: dto.isAvailable,
+          timezone: dto.timezone,
+        },
+      });
+
+      if (!timeslot) {
+        throw new InternalServerErrorException('Timeslot could not be created');
+      }
+
+      return {
+        data: timeslot,
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw error;
+    }
   }
 
   async getAllTimeslots(): Promise<ServiceInterface<timeslots[]>> {
@@ -103,4 +134,54 @@ export class TimeslotService {
       throw error;
     }
   }
+
+  async deleteTimeslotById(
+    timeslotId: number,
+  ): Promise<ServiceInterface<timeslots>> {
+    try {
+      const timeslot = await this.prisma.timeslots.delete({
+        where: {
+          id: timeslotId,
+        },
+      });
+
+      if (!timeslot) {
+        throw new UnprocessableEntityException('Timeslot could not be deleted');
+      }
+
+      return {
+        data: timeslot,
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw error;
+    }
+  }
+
+  async deleteAllTimeslots(): Promise<ServiceInterface<null>> {
+    try {
+      const timeslots = await this.prisma.timeslots.deleteMany();
+
+      if (!timeslots) {
+        throw new InternalServerErrorException(
+          'Timeslots could not be cleared',
+        );
+      }
+
+      return {
+        data: null,
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw error;
+    }
+  }
+
+  // private createDynamicTimeslot(): Promise<ServiceInterface<timeslots>> {
+  //   try {
+  //   } catch (error) {
+  //     this.logger.error(error);
+  //     throw error;
+  //   }
+  // }
 }

@@ -176,8 +176,8 @@ export class AuthService {
       };
 
       const resetToken = await this.jwt.signAsync(payload, {
-        secret: envConfig.getResetSecret,
-        expiresIn: envConfig.getJwtExpiration,
+        secret: envConfig.getResetSecret(),
+        expiresIn: envConfig.getJwtExpiration(),
       });
 
       await this.prisma.users.update({

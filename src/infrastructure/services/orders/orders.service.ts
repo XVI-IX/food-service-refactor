@@ -173,7 +173,16 @@ export class OrderService {
         where: {
           id: orderId,
         },
-        data: dto,
+        data: {
+          deliveryLocation: dto.deliveryLocation,
+          deliveryStatus: dto.deliveryStatus,
+          deliveryInstructions: dto.deliveryInstructions,
+          subTotalPrice: dto.subTotalPrice,
+          paymentMethod: dto.paymentMethod,
+          promoCode: dto.promoCode,
+          deliveryFee: dto.deliveryFee,
+          timeslotId: dto.timeslotId,
+        },
       });
 
       if (!updateOrder) {
