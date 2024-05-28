@@ -13,9 +13,15 @@ import * as argon from 'argon2';
 import { randomBytes } from 'crypto';
 import { IEmail } from 'src/domain/adapters/email.interface';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { LoginUserDto, ResetPasswordDto } from 'src/infrastructure/common/dto';
+import {
+  LoginUserDto,
+  ResetPasswordDto,
+  VerifyEmailDto,
+} from 'src/infrastructure/common/dto';
 import { JwtService } from '@nestjs/jwt';
 import { envConfig } from 'src/infrastructure/config/environment.config';
+import { ServiceInterface } from 'src/domain/adapters';
+import { users } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -47,7 +53,7 @@ export class AuthService {
     }
   }
 
-  async register(dto: CreateUserDto) {
+  async register(dto: CreateUserDto): Promise<ServiceInterface<users>> {
     try {
       await this.checkUser(dto.email);
 
@@ -75,6 +81,8 @@ export class AuthService {
         );
       }
 
+      delete user.password;
+
       const data: IEmail = {
         to: user.email,
         data: {
@@ -86,8 +94,7 @@ export class AuthService {
       this.emitter.emit('sendVerificationEmail', data);
 
       return {
-        message: 'Account created. Please verify your account',
-        success: true,
+        data: user,
       };
     } catch (error) {
       this.logger.error(error);
@@ -95,7 +102,42 @@ export class AuthService {
     }
   }
 
-  async authenticate(dto: LoginUserDto) {
+  async verifyEmail(dto: VerifyEmailDto): Promise<ServiceInterface<null>> {
+    try {
+      const user = await this.prisma.users.findUnique({
+        where: {
+          email: dto.email,
+        },
+      });
+
+      if (!user) {
+        throw new NotFoundException('User with email not found');
+      }
+
+      const verify = await this.prisma.users.update({
+        where: {
+          id: user.id,
+          verificationToken: dto.token,
+        },
+        data: {
+          verified: true,
+        },
+      });
+
+      if (!verify) {
+        throw new BadRequestException('User email could not be verified');
+      }
+
+      return {
+        data: null,
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw error;
+    }
+  }
+
+  async authenticate(dto: LoginUserDto): Promise<ServiceInterface<users>> {
     try {
       const checkExists = await this.checkUser(dto.email);
 
@@ -137,9 +179,7 @@ export class AuthService {
         this.emitter.emit('sendVerificationTokenEmail', data);
 
         return {
-          message: 'Please verify your account',
           data: updateToken,
-          success: true,
         };
       }
 
@@ -153,12 +193,10 @@ export class AuthService {
       });
 
       return {
-        message: 'Authentication successful',
         data: {
           ...checkExists,
-          token,
         },
-        success: true,
+        token,
       };
     } catch (error) {
       this.logger.error(error);
@@ -166,7 +204,7 @@ export class AuthService {
     }
   }
 
-  async forgotPassword(email: string) {
+  async forgotPassword(email: string): Promise<ServiceInterface<null>> {
     try {
       const checkExists = await this.checkUser(email);
 
@@ -201,9 +239,7 @@ export class AuthService {
       this.emitter.emit('sendResetTokenEmail', data);
 
       return {
-        message: 'Reset token sent',
         data: null,
-        success: true,
       };
     } catch (error) {
       this.logger.error(error);
@@ -211,7 +247,10 @@ export class AuthService {
     }
   }
 
-  async resetPassword(token: string, dto: ResetPasswordDto) {
+  async resetPassword(
+    token: string,
+    dto: ResetPasswordDto,
+  ): Promise<ServiceInterface<users>> {
     try {
       const userExists = await this.prisma.users.findUnique({
         where: {
@@ -251,10 +290,10 @@ export class AuthService {
         );
       }
 
+      delete updatedUser.password;
+
       return {
-        message: 'Password reset successfully',
         data: updatedUser,
-        success: true,
       };
     } catch (error) {
       this.logger.error(error);

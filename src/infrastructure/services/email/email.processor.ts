@@ -101,8 +101,8 @@ export class EmailProcessor {
       subject: 'Order Confirmed',
       template: './order-confirmed',
       context: {
-        userName
-      }
-    })
+        userName,
+      },
+    });
   }
 }
