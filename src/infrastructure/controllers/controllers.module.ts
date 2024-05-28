@@ -7,6 +7,7 @@ import { StoreModule } from '../services/stores/stores.module';
 import { TimeslotModule } from '../services/timeslots/timeslots.module';
 import { TransactionsModule } from '../services/transactions/transactions.module';
 import { AuthController } from './auth/auth.controller';
+import { CustomerController } from './customers/customers.controller';
 
 @Module({
   imports: [
@@ -18,7 +19,7 @@ import { AuthController } from './auth/auth.controller';
     TimeslotModule,
     TransactionsModule,
   ],
-  controllers: [AuthController],
+  controllers: [AuthController, CustomerController],
   providers: [],
 })
 export class ControllersModule {}

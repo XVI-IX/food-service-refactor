@@ -26,7 +26,7 @@ export class ItemService {
    * @returns {Promise<ServiceInterface>}
    */
   async addItemToStore(
-    storeId: number,
+    storeId: string,
     dto: CreateItemDto,
   ): Promise<ServiceInterface> {
     try {
@@ -97,7 +97,7 @@ export class ItemService {
    * @returns {Promise<ServiceInterface<items[]>>}
    */
   async getAllStoreItems(
-    storeId: number,
+    storeId: string,
     page: number = 1,
   ): Promise<ServiceInterface<items[]>> {
     try {
@@ -129,7 +129,7 @@ export class ItemService {
    * @param itemId Unique identifier for item to be retrieved
    * @returns {Promise<ServiceInterface>}
    */
-  async getItemById(itemId: number): Promise<ServiceInterface<items>> {
+  async getItemById(itemId: string): Promise<ServiceInterface<items>> {
     try {
       const item = await this.prisma.items.findUnique({
         where: {
@@ -158,7 +158,7 @@ export class ItemService {
    * @returns {Promise<ServiceInterface<items>>}
    */
   async updateItemById(
-    itemId: number,
+    itemId: string,
     dto: UpdateItemDto,
   ): Promise<ServiceInterface<items>> {
     try {
@@ -192,7 +192,7 @@ export class ItemService {
     }
   }
 
-  async deleteItem(itemId: number) {
+  async deleteItem(itemId: string) {
     try {
       const checkItemExists = await this.prisma.items.findUnique({
         where: {

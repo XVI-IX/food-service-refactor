@@ -60,7 +60,7 @@ export class CustomerService {
    * @param customerId ID of customer to be retrieved
    * @returns {Promise<ServiceInterface>}
    */
-  async getCustomerById(customerId: number): Promise<ServiceInterface> {
+  async getCustomerById(customerId: string): Promise<ServiceInterface> {
     try {
       const customer = await this.prisma.users.findUnique({
         where: {
@@ -87,7 +87,7 @@ export class CustomerService {
    * @returns {Promise<ServiceInterface>}
    */
   async updateCustomer(
-    customerId: number,
+    customerId: string,
     dto: UpdateCustomerDto,
   ): Promise<ServiceInterface> {
     try {
@@ -128,7 +128,7 @@ export class CustomerService {
    * @param customerId Unique ID representing customers' data in database
    * @returns {Promise<ServiceInterface>}
    */
-  async deleteCustomer(customerId: number): Promise<ServiceInterface> {
+  async deleteCustomer(customerId: string): Promise<ServiceInterface> {
     try {
       const customerExists = await this.prisma.users.findUnique({
         where: {

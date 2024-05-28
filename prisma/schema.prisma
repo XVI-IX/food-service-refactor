@@ -53,7 +53,7 @@ enum PaymentStatusEnum {
 }
 
 model users {
-  id                   Int            @id @default(autoincrement())
+  id                   String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userName             String
   firstName            String
   otherName            String?
@@ -78,9 +78,9 @@ model users {
 }
 
 model stores {
-  id                        Int            @id @default(autoincrement())
+  id                        String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   user                      users          @relation(fields: [userId], references: [id])
-  userId                    Int
+  userId                    String         @db.Uuid
   name                      String
   address                   String
   phone                     String
@@ -109,9 +109,9 @@ model stores {
 }
 
 model items {
-  id          Int          @id @default(autoincrement())
+  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   store       stores       @relation(fields: [storeId], references: [id])
-  storeId     Int
+  storeId     String       @db.Uuid
   name        String       @db.VarChar(255)
   description String       @db.Text()
   price       Float
@@ -127,11 +127,11 @@ model items {
 }
 
 model orders {
-  id                    Int             @id @default(autoincrement())
+  id                    String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   user                  users           @relation(fields: [userId], references: [id])
-  userId                Int
+  userId                String          @db.Uuid
   store                 stores          @relation(fields: [storeId], references: [id])
-  storeId               Int
+  storeId               String          @db.Uuid
   deliveryLocation      String
   deliveryStatus        OrderStatusEnum @default(placed)
   orderReference        String          @unique @default(uuid())
@@ -153,24 +153,24 @@ model orders {
 }
 
 model orderHistory {
-  id        Int                @id @default(autoincrement())
+  id        String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   order     orders             @relation(fields: [orderId], references: [id])
-  orderId   Int
+  orderId   String             @db.Uuid
   eventType OrderEventTypeEnum @default(status_change)
   timestamp DateTime           @default(now()) @db.Timestamp(6)
   actor     users              @relation(fields: [actorId], references: [id])
-  actorId   Int
+  actorId   String             @db.Uuid
   details   String?
   createdAt DateTime           @default(now()) @db.Timestamp()
   updatedAt DateTime           @updatedAt
 }
 
 model orderItems {
-  id             Int    @id @default(autoincrement())
+  id             String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   order          orders @relation(fields: [orderId], references: [id])
-  orderId        Int
+  orderId        String @db.Uuid
   item           items  @relation(fields: [itemId], references: [id])
-  itemId         Int
+  itemId         String @db.Uuid
   quantity       Int    @default(1)
   totalItemPrice Float?
   price          Float
@@ -181,8 +181,8 @@ model timeslots {
   startTime       DateTime @db.Timestamp(6)
   endTime         DateTime @db.Timestamp(6)
   timezone        String
-  orderCount      Int?      @default(0)
-  currentCapacity Int?      @default(0)
+  orderCount      Int?     @default(0)
+  currentCapacity Int?     @default(0)
   isAvailable     Boolean  @default(true)
   orders          orders[]
 
@@ -190,13 +190,13 @@ model timeslots {
 }
 
 model transactions {
-  id              Int                @id @default(autoincrement())
-  description     String?       
-  reference       String?             @unique
+  id              String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  description     String?
+  reference       String?            @unique
   order           orders?            @relation(fields: [orderId], references: [id])
-  orderId         Int?
+  orderId         String?            @db.Uuid
   store           stores?            @relation(fields: [storeId], references: [id])
-  storeId         Int?
+  storeId         String?            @db.Uuid
   paymentStatus   PaymentStatusEnum? @default(pending)
   amount          Float?             @default(0)
   transactionType String             @default("trasacio")
