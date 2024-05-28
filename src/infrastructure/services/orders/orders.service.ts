@@ -41,7 +41,7 @@ export class OrderService {
   }
 
   async getAllUserOrders(
-    userId: number,
+    userId: string,
     page: number = 1,
   ): Promise<ServiceInterface<orders[]>> {
     try {
@@ -70,7 +70,7 @@ export class OrderService {
   }
 
   async getAllStoreOrders(
-    storeId: number,
+    storeId: string,
     page: number = 1,
   ): Promise<ServiceInterface<orders[]>> {
     try {
@@ -99,7 +99,7 @@ export class OrderService {
   }
 
   async getOrderItems(
-    orderId: number,
+    orderId: string,
   ): Promise<ServiceInterface<orderItems[]>> {
     try {
       const orderItems = await this.prisma.orderItems.findMany({
@@ -132,7 +132,7 @@ export class OrderService {
     }
   }
 
-  async getOrderById(orderId: number): Promise<ServiceInterface<orders>> {
+  async getOrderById(orderId: string): Promise<ServiceInterface<orders>> {
     try {
       const order = await this.prisma.orders.findUnique({
         where: {
@@ -154,9 +154,9 @@ export class OrderService {
   }
 
   async updateOrder(
-    orderId: number,
+    orderId: string,
     dto: UpdateOrderDto,
-    userId: number,
+    userId: string,
   ): Promise<ServiceInterface<orders>> {
     try {
       const orderExists = await this.prisma.orders.findUnique({
@@ -220,8 +220,8 @@ export class OrderService {
   }
 
   async cancelOrder(
-    orderId: number,
-    userId: number,
+    orderId: string,
+    userId: string,
   ): Promise<ServiceInterface<orders>> {
     try {
       const order = await this.prisma.orders.findUnique({
