@@ -18,11 +18,11 @@ export class CreateTransactionDto {
 
   @IsNumber()
   @IsOptional()
-  orderId: number;
+  orderId: string;
 
   @IsNumber()
   @IsOptional()
-  storeId: number;
+  storeId: string;
 
   @IsString()
   paymentStatus: any;

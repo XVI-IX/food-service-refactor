@@ -20,7 +20,7 @@ export class StoreService {
   }
 
   async createStore(
-    userId: number,
+    userId: string,
     dto: CreateStoreDto,
   ): Promise<ServiceInterface<stores>> {
     try {
@@ -84,7 +84,7 @@ export class StoreService {
   }
 
   async getAllUserStores(
-    userId: number,
+    userId: string,
     page: number = 1,
   ): Promise<ServiceInterface<stores[]>> {
     try {
@@ -112,7 +112,7 @@ export class StoreService {
     }
   }
 
-  async getStoreById(storeId: number): Promise<ServiceInterface<stores>> {
+  async getStoreById(storeId: string): Promise<ServiceInterface<stores>> {
     try {
       const store = await this.prisma.stores.findUnique({
         where: {
@@ -134,7 +134,7 @@ export class StoreService {
   }
 
   async updateStore(
-    storeId: number,
+    storeId: string,
     dto: UpdateStoreDto,
   ): Promise<ServiceInterface<stores>> {
     try {
@@ -158,11 +158,11 @@ export class StoreService {
     }
   }
 
-  async deleteStore(storeID: number): Promise<ServiceInterface<stores>> {
+  async deleteStore(storeId: string): Promise<ServiceInterface<stores>> {
     try {
       const store = await this.prisma.stores.delete({
         where: {
-          id: storeID,
+          id: storeId,
         },
       });
 

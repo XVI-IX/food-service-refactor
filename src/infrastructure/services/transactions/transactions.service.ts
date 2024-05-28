@@ -37,7 +37,7 @@ export class TransactionsService {
   }
 
   async getTransactionById(
-    transactionId: number,
+    transactionId: string,
   ): Promise<ServiceInterface<transactions>> {
     try {
       const transaction = await this.prisma.transactions.findUnique({
