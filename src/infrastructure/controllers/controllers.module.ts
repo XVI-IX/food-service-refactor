@@ -21,7 +21,12 @@ import { OrdersController } from './orders/orders.controllers';
     TimeslotModule,
     TransactionsModule,
   ],
-  controllers: [AuthController, CustomerController, ItemsController, OrdersController],
+  controllers: [
+    AuthController,
+    CustomerController,
+    ItemsController,
+    OrdersController,
+  ],
   providers: [],
 })
 export class ControllersModule {}
