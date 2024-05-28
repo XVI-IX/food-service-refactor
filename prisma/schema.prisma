@@ -146,7 +146,7 @@ model orders {
   taxAmount             String?
   deliveryFee           String?
   timeslot              timeslots       @relation(fields: [timeslotId], references: [id])
-  timeslotId            Int
+  timeslotId            String          @db.Uuid
   orderHistory          orderHistory[]
   orderItems            orderItems[]
   transactions          transactions[]
@@ -177,7 +177,7 @@ model orderItems {
 }
 
 model timeslots {
-  id              Int      @id @default(autoincrement())
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   startTime       DateTime @db.Timestamp(6)
   endTime         DateTime @db.Timestamp(6)
   timezone        String

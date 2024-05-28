@@ -69,7 +69,7 @@ export class TimeslotService {
   }
 
   async getTimeslotById(
-    timeslotId: number,
+    timeslotId: string,
   ): Promise<ServiceInterface<timeslots>> {
     try {
       const timeslot = await this.prisma.timeslots.findUnique({
@@ -94,7 +94,7 @@ export class TimeslotService {
   }
 
   async updateTimeslot(
-    timeslotId: number,
+    timeslotId: string,
     dto: UpdateTimeslotDto,
   ): Promise<ServiceInterface<timeslots>> {
     try {
@@ -136,7 +136,7 @@ export class TimeslotService {
   }
 
   async deleteTimeslotById(
-    timeslotId: number,
+    timeslotId: string,
   ): Promise<ServiceInterface<timeslots>> {
     try {
       const timeslot = await this.prisma.timeslots.delete({

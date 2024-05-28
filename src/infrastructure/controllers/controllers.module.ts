@@ -10,6 +10,8 @@ import { AuthController } from './auth/auth.controller';
 import { CustomerController } from './customers/customers.controller';
 import { ItemsController } from './items/items.controllers';
 import { OrdersController } from './orders/orders.controllers';
+import { StoreController } from './stores/store.controllers';
+import { TimeslotController } from './timeslots/timeslots.controller';
 
 @Module({
   imports: [
@@ -26,6 +28,8 @@ import { OrdersController } from './orders/orders.controllers';
     CustomerController,
     ItemsController,
     OrdersController,
+    StoreController,
+    TimeslotController,
   ],
   providers: [],
 })
