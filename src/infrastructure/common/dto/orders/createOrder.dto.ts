@@ -9,7 +9,7 @@ import {
 export class CreateOrderDto {
   @IsNumber()
   @IsNotEmpty()
-  storeId: number;
+  storeId: string;
 
   @IsNotEmpty()
   @IsString()
@@ -41,5 +41,5 @@ export class CreateOrderDto {
 
   @IsNotEmpty()
   @IsNumber()
-  timeslotId: number;
+  timeslotId: string;
 }

@@ -16,13 +16,17 @@ export class CreateTransactionDto {
   @IsOptional()
   description: string;
 
-  @IsNumber()
+  @IsString()
   @IsOptional()
   orderId: string;
 
-  @IsNumber()
+  @IsString()
   @IsOptional()
   storeId: string;
+
+  @IsString()
+  @IsNotEmpty()
+  userId: string;
 
   @IsString()
   paymentStatus: any;

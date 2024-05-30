@@ -30,6 +30,7 @@ import { TimeslotController } from './timeslots/timeslots.controller';
     OrdersController,
     StoreController,
     TimeslotController,
+    TransactionsModule,
   ],
   providers: [],
 })

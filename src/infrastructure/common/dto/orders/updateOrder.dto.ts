@@ -8,5 +8,5 @@ export class UpdateOrderDto extends CreateOrderDto {
   details: string;
 
   @Exclude()
-  storeId: number;
+  storeId: string;
 }

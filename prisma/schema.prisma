@@ -75,6 +75,7 @@ model users {
   stores               stores[]
   orders               orders[]
   orderHistory         orderHistory[]
+  transactions         transactions[]
 }
 
 model stores {
@@ -191,6 +192,8 @@ model timeslots {
 
 model transactions {
   id              String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user            users              @relation(fields: [userId], references: [id])
+  userId          String             @db.Uuid
   description     String?
   reference       String?            @unique
   order           orders?            @relation(fields: [orderId], references: [id])

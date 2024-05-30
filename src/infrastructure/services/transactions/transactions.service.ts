@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
   Logger,
@@ -67,6 +68,11 @@ export class TransactionsService {
     try {
       const transaction = await this.prisma.transactions.create({
         data: {
+          user: {
+            connect: {
+              id: dto.userId,
+            },
+          },
           description: dto.description,
           reference: dto.reference,
           order: {
@@ -95,6 +101,81 @@ export class TransactionsService {
 
       return {
         data: transaction,
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw error;
+    }
+  }
+
+  async getAllUsersTransactions(
+    userId: string,
+  ): Promise<ServiceInterface<transactions[]>> {
+    try {
+      const userTransactions = await this.prisma.transactions.findMany({
+        where: {
+          userId: userId,
+        },
+      });
+
+      if (!userTransactions) {
+        throw new BadRequestException(
+          'Users transaction could not be retrieved',
+        );
+      }
+
+      return {
+        data: userTransactions,
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw error;
+    }
+  }
+
+  async getAllStoreTransactions(
+    storeId: string,
+  ): Promise<ServiceInterface<transactions[]>> {
+    try {
+      const storeTransactions = await this.prisma.transactions.findMany({
+        where: {
+          storeId: storeId,
+        },
+      });
+
+      if (!storeId) {
+        throw new BadRequestException(
+          'Store transactions could not be retrieved',
+        );
+      }
+
+      return {
+        data: storeTransactions,
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw error;
+    }
+  }
+
+  async getAllOrderTransactions(
+    orderId: string,
+  ): Promise<ServiceInterface<transactions[]>> {
+    try {
+      const orderTransactions = await this.prisma.transactions.findMany({
+        where: {
+          orderId: orderId,
+        },
+      });
+
+      if (!orderTransactions) {
+        throw new BadRequestException(
+          'Order transactions could not be retrieved',
+        );
+      }
+
+      return {
+        data: orderTransactions,
       };
     } catch (error) {
       this.logger.error(error);
