@@ -11,4 +11,12 @@ export interface IUser extends IBase {
   verificationToken?: string;
   resetToken?: string;
   orders: any[];
+  transactions: any[];
+}
+
+export interface IUserResponse {
+  status?: boolean;
+  message?: string | null;
+  data?: IUser | IUser[];
+  page?: number;
 }

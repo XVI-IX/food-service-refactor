@@ -5,13 +5,15 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { users } from '@prisma/client';
 import { ServiceInterface } from 'src/domain/adapters';
+import { ICustomerService } from 'src/domain/adapters/customer.interface';
 import { UpdateCustomerDto } from 'src/infrastructure/common/dto';
 import { envConfig } from 'src/infrastructure/config/environment.config';
 import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
 
 @Injectable()
-export class CustomerService {
+export class CustomerService implements ICustomerService {
   private logger: Logger;
   constructor(
     private readonly prisma: PrismaService,
