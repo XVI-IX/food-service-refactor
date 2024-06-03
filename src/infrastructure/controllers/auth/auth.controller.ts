@@ -6,6 +6,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
+import { Public } from 'src/infrastructure/common/decorators';
 import {
   CreateUserDto,
   LoginUserDto,
@@ -20,6 +21,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post()
+  @Public()
   async register(@Body() dto: CreateUserDto) {
     const response = await this.authService.register(dto);
     return HttpResponse.send('User registered successfully', response);
@@ -27,6 +29,7 @@ export class AuthController {
 
   @Post('authenticate')
   @HttpCode(HttpStatus.OK)
+  @Public()
   async authenticate(@Body() dto: LoginUserDto) {
     const response = await this.authService.authenticate(dto);
     return HttpResponse.send('User authenticated', response);
@@ -34,6 +37,7 @@ export class AuthController {
 
   @Post('forgot-password')
   @HttpCode(HttpStatus.OK)
+  @Public()
   async forgotPassword(@Body('email') email: string) {
     const response = await this.authService.forgotPassword(email);
     return HttpResponse.send('Reset token has been sent', response);
@@ -41,6 +45,7 @@ export class AuthController {
 
   @Post('reset-password')
   @HttpCode(HttpStatus.OK)
+  @Public()
   async resetPassword(
     @Query('token') token: string,
     @Body() dto: ResetPasswordDto,
@@ -51,6 +56,7 @@ export class AuthController {
 
   @Post('verify-email')
   @HttpCode(HttpStatus.OK)
+  @Public()
   async verifyEmail(@Body() dto: VerifyEmailDto) {
     const response = await this.authService.verifyEmail(dto);
     return HttpResponse.send('Email verified', response);

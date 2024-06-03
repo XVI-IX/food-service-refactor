@@ -7,9 +7,13 @@ import { AuthModule } from './infrastructure/services/auth/auth.module';
 import { ItemModule } from './infrastructure/services/items/items.module';
 import { CustomerModule } from './infrastructure/services/customers/customers.module';
 import { ControllersModule } from './infrastructure/controllers/controllers.module';
+import { APP_GUARD } from '@nestjs/core';
+import { AuthGuard } from './infrastructure/common/guards/auth.guard';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
+    JwtModule,
     OrderModule,
     AuthModule,
     ItemModule,
@@ -20,6 +24,12 @@ import { ControllersModule } from './infrastructure/controllers/controllers.modu
     ControllersModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
+  ],
 })
 export class AppModule {}

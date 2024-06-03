@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
   Logger,
@@ -6,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { stores } from '@prisma/client';
 import { ServiceInterface } from 'src/domain/adapters';
+import { IAuthUser } from 'src/infrastructure/common/decorators';
 import { CreateStoreDto } from 'src/infrastructure/common/dto';
 import { UpdateStoreDto } from 'src/infrastructure/common/dto/stores/updateStore.dto';
 import { envConfig } from 'src/infrastructure/config/environment.config';
@@ -20,7 +22,7 @@ export class StoreService {
   }
 
   async createStore(
-    userId: string,
+    user: IAuthUser,
     dto: CreateStoreDto,
   ): Promise<ServiceInterface<stores>> {
     try {
@@ -28,7 +30,7 @@ export class StoreService {
         data: {
           user: {
             connect: {
-              id: userId,
+              id: user.id,
             },
           },
           name: dto.name,
@@ -51,6 +53,21 @@ export class StoreService {
 
       if (!store) {
         throw new InternalServerErrorException('Store could not be created');
+      }
+
+      if (!user.roles.includes('vendor')) {
+        const updateUser = await this.prisma.users.update({
+          where: {
+            id: user.id,
+          },
+          data: {
+            role: 'vendor',
+          },
+        });
+
+        if (!updateUser) {
+          this.logger.error('User role could not be updated');
+        }
       }
 
       return {
@@ -160,6 +177,36 @@ export class StoreService {
 
   async deleteStore(storeId: string): Promise<ServiceInterface<stores>> {
     try {
+      const checkStoreOrders = await this.prisma.orders.findMany({
+        where: {
+          storeId: storeId,
+          deliveryStatus: {
+            in: ['confirmed', 'in_progress', 'placed'],
+          },
+        },
+      });
+
+      if (checkStoreOrders.length > 0) {
+        throw new BadRequestException(
+          'Ensure all orders are handled before deleting the store.',
+        );
+      }
+
+      const checkTransactions = await this.prisma.transactions.findMany({
+        where: {
+          storeId: storeId,
+          paymentStatus: {
+            in: ['failed', 'pending'],
+          },
+        },
+      });
+
+      if (checkTransactions.length > 0) {
+        throw new BadRequestException(
+          'Please handle pending transactions befoe deleting the store',
+        );
+      }
+
       const store = await this.prisma.stores.delete({
         where: {
           id: storeId,

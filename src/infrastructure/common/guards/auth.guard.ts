@@ -8,6 +8,7 @@ import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
+import { envConfig } from 'src/infrastructure/config/environment.config';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -30,13 +31,15 @@ export class AuthGuard implements CanActivate {
     const token = this.extractTokenFromHeader(request);
 
     if (!token) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('Please include Bearer token');
     }
 
     try {
       const payload = await this.jwt.verifyAsync(token, {
-        secret: 'SECREt',
+        secret: envConfig.getJWTSecret(),
       });
+
+      console.log(payload);
 
       request['user'] = payload;
     } catch (error) {
@@ -47,7 +50,7 @@ export class AuthGuard implements CanActivate {
   }
 
   private extractTokenFromHeader(request: Request): string | undefined {
-    const [type, token] = request.headers.authorization?.split('') ?? [];
+    const [type, token] = request.headers.authorization?.split(' ') ?? [];
     return type === 'Bearer' ? token : undefined;
   }
 }

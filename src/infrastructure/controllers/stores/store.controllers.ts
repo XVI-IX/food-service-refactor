@@ -25,7 +25,7 @@ export class StoreController {
     @GetAuthUser() user: IAuthUser,
     @Body() dto: CreateStoreDto,
   ) {
-    const response = await this.storeService.createStore(user.id, dto);
+    const response = await this.storeService.createStore(user, dto);
     return HttpResponse.send('Store created successfully', response);
   }
 

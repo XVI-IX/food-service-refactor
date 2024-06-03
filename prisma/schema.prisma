@@ -76,6 +76,15 @@ model users {
   orders               orders[]
   orderHistory         orderHistory[]
   transactions         transactions[]
+  userSettings         userSettings[]
+}
+
+model userSettings {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt
+  user      users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String   @db.Uuid
 }
 
 model stores {

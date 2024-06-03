@@ -22,6 +22,7 @@ import { JsonWebTokenError, JwtService } from '@nestjs/jwt';
 import { envConfig } from 'src/infrastructure/config/environment.config';
 import { ServiceInterface } from 'src/domain/adapters';
 import { users } from '@prisma/client';
+import { IAuthUser } from 'src/infrastructure/common/decorators';
 
 @Injectable()
 export class AuthService {
@@ -185,9 +186,10 @@ export class AuthService {
         };
       }
 
-      const payload = {
-        sub: checkExists.id,
+      const payload: IAuthUser = {
+        id: checkExists.id,
         email: checkExists.email,
+        roles: [checkExists.role],
       };
       const token = await this.jwt.signAsync(payload, {
         secret: envConfig.getJWTSecret(),
