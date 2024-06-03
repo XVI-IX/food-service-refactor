@@ -18,7 +18,7 @@ import {
   ResetPasswordDto,
   VerifyEmailDto,
 } from 'src/infrastructure/common/dto';
-import { JwtService } from '@nestjs/jwt';
+import { JsonWebTokenError, JwtService } from '@nestjs/jwt';
 import { envConfig } from 'src/infrastructure/config/environment.config';
 import { ServiceInterface } from 'src/domain/adapters';
 import { users } from '@prisma/client';
@@ -42,10 +42,6 @@ export class AuthService {
         },
       });
 
-      if (!user) {
-        throw new NotFoundException('User with email not found');
-      }
-
       return user;
     } catch (error) {
       this.logger.error(error);
@@ -55,7 +51,11 @@ export class AuthService {
 
   async register(dto: CreateUserDto): Promise<ServiceInterface<users>> {
     try {
-      await this.checkUser(dto.email);
+      const checkExists = await this.checkUser(dto.email);
+
+      if (checkExists) {
+        throw new BadRequestException('Email already in use.');
+      }
 
       const passwordHash = await argon.hash(dto.password);
       const verificationToken = this.generateOTP();
@@ -178,6 +178,8 @@ export class AuthService {
 
         this.emitter.emit('sendVerificationTokenEmail', data);
 
+        delete updateToken.password;
+
         return {
           data: updateToken,
         };
@@ -192,11 +194,12 @@ export class AuthService {
         expiresIn: envConfig.getJwtExpiration(),
       });
 
+      delete checkExists.password;
       return {
         data: {
           ...checkExists,
         },
-        token,
+        token: token,
       };
     } catch (error) {
       this.logger.error(error);
@@ -252,9 +255,28 @@ export class AuthService {
     dto: ResetPasswordDto,
   ): Promise<ServiceInterface<users>> {
     try {
+      const revokedToken = await this.prisma.revokedToken.findUnique({
+        where: {
+          token: token,
+        },
+      });
+
+      if (revokedToken) {
+        throw new BadRequestException('Token already revoked.');
+      }
+
+      const payload = await this.jwt.verifyAsync(token, {
+        secret: envConfig.getResetSecret(),
+      });
+
+      if (!payload) {
+        throw new JsonWebTokenError('Reset token could not be verified');
+      }
+
       const userExists = await this.prisma.users.findUnique({
         where: {
-          email: dto.email,
+          id: payload.sub,
+          email: payload.email,
         },
       });
 
@@ -264,7 +286,7 @@ export class AuthService {
 
       if (token === userExists.resetToken) {
         const tokenValid = await this.jwt.verifyAsync(token, {
-          secret: envConfig.getJWTSecret(),
+          secret: envConfig.getResetSecret(),
         });
 
         if (!tokenValid) {
@@ -276,7 +298,7 @@ export class AuthService {
 
       const updatedUser = await this.prisma.users.update({
         where: {
-          email: dto.email,
+          email: payload.email,
         },
         data: {
           password: hash,
@@ -285,12 +307,22 @@ export class AuthService {
       });
 
       if (!updatedUser) {
-        throw new InternalServerErrorException(
+        throw new BadRequestException(
           `resetPassword: Password could not be reset`,
         );
       }
 
       delete updatedUser.password;
+
+      const revokeToken = await this.prisma.revokedToken.create({
+        data: {
+          token: token,
+        },
+      });
+
+      if (!revokeToken) {
+        throw new BadRequestException('Token could not be revoked');
+      }
 
       return {
         data: updatedUser,

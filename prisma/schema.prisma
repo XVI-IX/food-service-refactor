@@ -208,3 +208,9 @@ model transactions {
   createdAt       DateTime           @default(now()) @db.Timestamp(6)
   updatedAt       DateTime           @updatedAt @db.Timestamp(6)
 }
+
+model revokedToken {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  token     String   @unique
+  revokedAt DateTime @default(now()) @db.Timestamptz(6)
+}

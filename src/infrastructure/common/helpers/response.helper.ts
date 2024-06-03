@@ -8,6 +8,7 @@ export class HttpResponse {
       message,
       data: data && data.data ? data.data : null,
       page: data && data.page ? data.page : 1,
+      token: data && data.token ? data.token : null,
     };
   }
 

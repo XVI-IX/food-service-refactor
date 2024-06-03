@@ -12,6 +12,7 @@ import { ItemsController } from './items/items.controllers';
 import { OrdersController } from './orders/orders.controllers';
 import { StoreController } from './stores/store.controllers';
 import { TimeslotController } from './timeslots/timeslots.controller';
+import { TransactionsController } from './transactions/transactions.controller';
 
 @Module({
   imports: [
@@ -30,7 +31,7 @@ import { TimeslotController } from './timeslots/timeslots.controller';
     OrdersController,
     StoreController,
     TimeslotController,
-    TransactionsModule,
+    TransactionsController,
   ],
   providers: [],
 })
