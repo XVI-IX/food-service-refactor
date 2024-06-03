@@ -5,7 +5,6 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { users } from '@prisma/client';
 import { ServiceInterface } from 'src/domain/adapters';
 import { ICustomerService } from 'src/domain/adapters/customer.interface';
 import { UpdateCustomerDto } from 'src/infrastructure/common/dto';
@@ -38,6 +37,19 @@ export class CustomerService implements ICustomerService {
         },
         skip: (page - 1) * this.PAGINATION_LIMIT,
         take: this.PAGINATION_LIMIT,
+        select: {
+          id: true,
+          firstName: true,
+          otherName: true,
+          lastName: true,
+          email: true,
+          phone: true,
+          role: true,
+          businessAddress: true,
+          createdAt: true,
+          updatedAt: true,
+          status: true,
+        },
       });
 
       if (!customers) {
@@ -67,6 +79,19 @@ export class CustomerService implements ICustomerService {
       const customer = await this.prisma.users.findUnique({
         where: {
           id: customerId,
+        },
+        select: {
+          id: true,
+          firstName: true,
+          otherName: true,
+          lastName: true,
+          email: true,
+          phone: true,
+          role: true,
+          businessAddress: true,
+          createdAt: true,
+          updatedAt: true,
+          status: true,
         },
       });
 
@@ -108,7 +133,20 @@ export class CustomerService implements ICustomerService {
         where: {
           id: customerId,
         },
-        data: dto,
+        data: {
+          firstName: dto.firstName,
+          lastName: dto.lastName,
+          otherName: dto.otherName,
+          phone: dto.phone,
+        },
+        select: {
+          firstName: true,
+          lastName: true,
+          otherName: true,
+          phone: true,
+          createdAt: true,
+          updatedAt: true,
+        },
       });
 
       if (!updatedCustomer) {
