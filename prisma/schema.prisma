@@ -30,6 +30,7 @@ enum OrderStatusEnum {
   out_for_delivery
   delivered
   cancelled
+  failed
 }
 
 enum OrderTypeEnum {
@@ -39,6 +40,7 @@ enum OrderTypeEnum {
 }
 
 enum OrderEventTypeEnum {
+  placement
   status_change
   modification
   cancellation
@@ -155,8 +157,8 @@ model orders {
   cancellationReason    String?
   taxAmount             String?
   deliveryFee           String?
-  timeslot              timeslots       @relation(fields: [timeslotId], references: [id])
-  timeslotId            String          @db.Uuid
+  timeslot              timeslots?      @relation(fields: [timeslotId], references: [id])
+  timeslotId            String?         @db.Uuid
   orderHistory          orderHistory[]
   orderItems            orderItems[]
   transactions          transactions[]

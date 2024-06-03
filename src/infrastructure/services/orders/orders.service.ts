@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { orderItems, orders } from '@prisma/client';
 import { ServiceInterface } from 'src/domain/adapters';
-import { UpdateOrderDto } from 'src/infrastructure/common/dto';
+import { CreateOrderDto, UpdateOrderDto } from 'src/infrastructure/common/dto';
 import { envConfig } from 'src/infrastructure/config/environment.config';
 import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
 
@@ -17,6 +17,154 @@ export class OrderService {
 
   constructor(private readonly prisma: PrismaService) {
     this.logger = new Logger(OrderService.name);
+  }
+
+  async createOrder(
+    userId: string,
+    dto: CreateOrderDto,
+  ): Promise<ServiceInterface<orders>> {
+    try {
+      const order = await this.prisma.orders.create({
+        data: {
+          user: {
+            connect: {
+              id: userId,
+            },
+          },
+          store: {
+            connect: {
+              id: dto.storeId,
+            },
+          },
+          deliveryLocation: dto.deliveryLocation,
+          deliveryInstructions: dto.deliveryInstructions,
+          subTotalPrice: dto.subTotalPrice,
+          paymentMethod: dto.paymentMethod,
+        },
+      });
+
+      if (!order) {
+        throw new BadRequestException('Order could not be placed');
+      }
+
+      const addOrderHistory = await this.prisma.orderHistory.create({
+        data: {
+          order: {
+            connect: {
+              id: order.id,
+            },
+          },
+          eventType: 'placement',
+          actor: {
+            connect: {
+              id: userId,
+            },
+          },
+        },
+      });
+
+      if (!addOrderHistory) {
+        await this.prisma.orders.delete({
+          where: {
+            id: order.id,
+          },
+        });
+        throw new BadRequestException('Order history could not be recorded');
+      }
+
+      const addOrderItems = dto.orderItems.map(async (orderItem) => {
+        try {
+          const findItem = await this.prisma.items.findUnique({
+            where: {
+              id: orderItem.id,
+              storeId: dto.storeId,
+            },
+          });
+
+          if (!findItem) {
+            throw new BadRequestException('Item could not be found in Store');
+          }
+
+          const item = await this.prisma.orderItems.create({
+            data: {
+              order: {
+                connect: {
+                  id: order.id,
+                },
+              },
+              item: {
+                connect: {
+                  id: findItem.id,
+                },
+              },
+              price: findItem.price,
+              quantity: orderItem.quantity,
+            },
+          });
+
+
+          if (!item) {
+            await this.prisma.orders.update({
+              where: {
+                id: order.id,
+              },
+              data: {
+                deliveryStatus: 'failed',
+              },
+            });
+            throw new BadRequestException('Order item could not be added');
+          }
+        } catch (error) {
+          this.logger.error(error);
+          throw error;
+        }
+      });
+
+      await Promise.all(addOrderItems);
+
+      if (!addOrderItems) {
+        throw new BadRequestException('Order items could not be added');
+      }
+
+      const ordersFinal = await this.prisma.orders.findUnique({
+        where: {
+          id: order.id,
+        },
+        select: {
+          id: true,
+          userId: true,
+          storeId: true,
+          deliveryLocation: true,
+          deliveryStatus: true,
+          orderReference: true,
+          deliveryInstructions: true,
+          subTotalPrice: true,
+          paymentMethod: true,
+          estimatedDeliveryTime: true,
+          promoCode: true,
+          taxAmount: true,
+          deliveryFee: true,
+          orderHistory: true,
+          orderItems: true,
+          transactions: true,
+          feedback: true,
+          rating: true,
+          cancellationReason: true,
+          timeslotId: true,
+        },
+      });
+
+      if (!ordersFinal) {
+        throw new BadRequestException('Order could not be retrieved');
+      }
+
+      return {
+        data: ordersFinal,
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw error;
+    }
   }
 
   async getAllOrders(page: number = 1): Promise<ServiceInterface<orders[]>> {

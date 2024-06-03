@@ -1,12 +1,21 @@
 import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { GetAuthUser, IAuthUser } from 'src/infrastructure/common/decorators';
-import { UpdateOrderDto } from 'src/infrastructure/common/dto';
+import { CreateOrderDto, UpdateOrderDto } from 'src/infrastructure/common/dto';
 import { HttpResponse } from 'src/infrastructure/common/helpers/response.helper';
 import { OrderService } from 'src/infrastructure/services/orders/orders.service';
 
 @Controller('orders')
 export class OrdersController {
   constructor(private readonly ordersService: OrderService) {}
+
+  @Post()
+  async createOrder(
+    @GetAuthUser() user: IAuthUser,
+    @Body() dto: CreateOrderDto,
+  ) {
+    const response = await this.ordersService.createOrder(user.id, dto);
+    return HttpResponse.send('Order placed', response);
+  }
 
   @Get()
   async getAllOrders(@Query('page') page: number) {

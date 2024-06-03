@@ -1,4 +1,5 @@
 import {
+  IsArray,
   IsNotEmpty,
   IsNumber,
   IsNumberString,
@@ -42,4 +43,8 @@ export class CreateOrderDto {
   @IsNotEmpty()
   @IsNumber()
   timeslotId: string;
+
+  @IsNotEmpty()
+  @IsArray()
+  orderItems: any[];
 }
