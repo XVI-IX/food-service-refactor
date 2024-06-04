@@ -5,14 +5,14 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { orderItems, orders } from '@prisma/client';
-import { ServiceInterface } from 'src/domain/adapters';
+// import { orderItems, orders } from '@prisma/client';
+import { IOrders, IOrderService, ServiceInterface } from 'src/domain/adapters';
 import { CreateOrderDto, UpdateOrderDto } from 'src/infrastructure/common/dto';
 import { envConfig } from 'src/infrastructure/config/environment.config';
 import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
 
 @Injectable()
-export class OrderService {
+export class OrderService implements IOrderService {
   private logger: Logger;
 
   constructor(private readonly prisma: PrismaService) {
@@ -22,7 +22,7 @@ export class OrderService {
   async createOrder(
     userId: string,
     dto: CreateOrderDto,
-  ): Promise<ServiceInterface<orders>> {
+  ): Promise<ServiceInterface> {
     try {
       const order = await this.prisma.orders.create({
         data: {
@@ -102,7 +102,6 @@ export class OrderService {
             },
           });
 
-
           if (!item) {
             await this.prisma.orders.update({
               where: {
@@ -167,7 +166,7 @@ export class OrderService {
     }
   }
 
-  async getAllOrders(page: number = 1): Promise<ServiceInterface<orders[]>> {
+  async getAllOrders(page: number = 1): Promise<ServiceInterface> {
     try {
       const orders = await this.prisma.orders.findMany({
         skip: (page - 1) * envConfig.getPaginationLimit(),
@@ -191,7 +190,7 @@ export class OrderService {
   async getAllUserOrders(
     userId: string,
     page: number = 1,
-  ): Promise<ServiceInterface<orders[]>> {
+  ): Promise<ServiceInterface> {
     try {
       const userOrders = await this.prisma.orders.findMany({
         where: {
@@ -220,7 +219,7 @@ export class OrderService {
   async getAllStoreOrders(
     storeId: string,
     page: number = 1,
-  ): Promise<ServiceInterface<orders[]>> {
+  ): Promise<ServiceInterface> {
     try {
       const storeOrders = await this.prisma.orders.findMany({
         where: {
@@ -246,9 +245,8 @@ export class OrderService {
     }
   }
 
-  async getOrderItems(
-    orderId: string,
-  ): Promise<ServiceInterface<orderItems[]>> {
+  // TODO: IOrderItems
+  async getOrderItems(orderId: string): Promise<ServiceInterface> {
     try {
       const orderItems = await this.prisma.orderItems.findMany({
         where: {
@@ -280,7 +278,7 @@ export class OrderService {
     }
   }
 
-  async getOrderById(orderId: string): Promise<ServiceInterface<orders>> {
+  async getOrderById(orderId: string): Promise<ServiceInterface> {
     try {
       const order = await this.prisma.orders.findUnique({
         where: {
@@ -307,7 +305,7 @@ export class OrderService {
           rating: true,
           cancellationReason: true,
           timeslotId: true,
-        }
+        },
       });
 
       if (!order) {
@@ -327,7 +325,7 @@ export class OrderService {
     orderId: string,
     dto: UpdateOrderDto,
     userId: string,
-  ): Promise<ServiceInterface<orders>> {
+  ): Promise<ServiceInterface> {
     try {
       const orderExists = await this.prisma.orders.findUnique({
         where: {
@@ -392,7 +390,7 @@ export class OrderService {
   async cancelOrder(
     orderId: string,
     userId: string,
-  ): Promise<ServiceInterface<orders>> {
+  ): Promise<ServiceInterface> {
     try {
       const order = await this.prisma.orders.findUnique({
         where: {
