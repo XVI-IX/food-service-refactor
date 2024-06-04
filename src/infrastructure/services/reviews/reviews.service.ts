@@ -4,13 +4,10 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import {
-  IReviewsResponse,
-  IReviewsService,
-} from '../../../domain/adapters/reviews.interface';
-import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
+import { IReviewsService } from '../../../domain/adapters/reviews.interface';
+import { PrismaService } from '../../../infrastructure/prisma/prisma.service';
 import { ServiceInterface } from '../../../domain/adapters/service.interface';
-import { CreateItemReviewDto } from '../../common/dto';
+import { CreateItemReviewDto, CreateStoreReviewDto } from '../../common/dto';
 
 @Injectable()
 export class ReviewsService implements IReviewsService {
@@ -36,7 +33,7 @@ export class ReviewsService implements IReviewsService {
     }
   }
 
-  async getReviewById(reviewId: string): Promise<IReviewsResponse> {
+  async getReviewById(reviewId: string): Promise<ServiceInterface> {
     try {
       const review = await this.prisma.reviews.findUnique({
         where: {
@@ -62,7 +59,8 @@ export class ReviewsService implements IReviewsService {
   async addItemReview(
     itemId: string,
     dto: CreateItemReviewDto,
-  ): Promise<IReviewsResponse> {
+    userId: string,
+  ): Promise<ServiceInterface> {
     try {
       const itemExists = await this.prisma.items.findUnique({
         where: {
@@ -83,11 +81,115 @@ export class ReviewsService implements IReviewsService {
           },
           content: dto.content,
           rating: dto.rating,
+          user: {
+            connect: {
+              id: userId,
+            },
+          },
         },
       });
 
       if (!review) {
         throw new BadRequestException('Review could not be added to item');
+      }
+
+      return {
+        data: review,
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw error;
+    }
+  }
+
+  async addStoreReview(
+    storeId: string,
+    dto: CreateStoreReviewDto,
+    userId: string,
+  ): Promise<ServiceInterface> {
+    try {
+      const review = await this.prisma.reviews.create({
+        data: {
+          store: {
+            connect: {
+              id: storeId,
+            },
+          },
+          content: dto.content,
+          rating: dto.rating,
+          user: {
+            connect: {
+              id: userId,
+            },
+          },
+        },
+      });
+
+      if (!review) {
+        throw new BadRequestException('Store review could not be created');
+      }
+
+      return {
+        data: review,
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw error;
+    }
+  }
+
+  async getAllItemReviews(itemId: string): Promise<ServiceInterface> {
+    try {
+      const itemReviews = await this.prisma.reviews.findMany({
+        where: {
+          itemId: itemId,
+        },
+      });
+
+      if (!itemReviews) {
+        throw new BadRequestException('Item reviews could not be retrieved');
+      }
+
+      return {
+        data: itemReviews,
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw error;
+    }
+  }
+
+  async getAllStoreReviews(storeId: string): Promise<ServiceInterface> {
+    try {
+      const storeReviews = await this.prisma.reviews.findMany({
+        where: {
+          storeId: storeId,
+        },
+      });
+
+      if (!storeReviews) {
+        throw new BadRequestException('Store reviews could not be retrieved');
+      }
+
+      return {
+        data: storeReviews,
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw error;
+    }
+  }
+
+  async deleteReview(reviewId: string): Promise<ServiceInterface> {
+    try {
+      const review = this.prisma.reviews.delete({
+        where: {
+          id: reviewId,
+        },
+      });
+
+      if (!review) {
+        throw new BadRequestException('Review could not be deleted');
       }
 
       return {

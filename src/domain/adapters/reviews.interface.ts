@@ -25,10 +25,12 @@ export interface IReviewsService {
   addStoreReview(
     storeId: string,
     dto: CreateStoreReviewDto,
+    userId: string,
   ): Promise<IReviewsResponse>;
   addItemReview(
     itemId: string,
     dto: CreateItemReviewDto,
+    userId: string,
   ): Promise<IReviewsResponse>;
   deleteReview(reviewId: string): Promise<IReviewsResponse>;
 }
