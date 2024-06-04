@@ -4,14 +4,14 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { items } from '@prisma/client';
 import { ServiceInterface } from 'src/domain/adapters';
+import { IItemsService } from 'src/domain/adapters/items.interface';
 import { CreateItemDto, UpdateItemDto } from 'src/infrastructure/common/dto';
 import { envConfig } from 'src/infrastructure/config/environment.config';
 import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
 
 @Injectable()
-export class ItemService {
+export class ItemService implements IItemsService {
   private logger: Logger;
 
   constructor(private readonly prisma: PrismaService) {
@@ -94,12 +94,12 @@ export class ItemService {
    *
    * @param storeId Unique identifier for the store.
    * @param page Current page pointer for pagination
-   * @returns {Promise<ServiceInterface<items[]>>}
+   * @returns {Promise<ServiceInterface>}
    */
   async getAllStoreItems(
     storeId: string,
     page: number = 1,
-  ): Promise<ServiceInterface<items[]>> {
+  ): Promise<ServiceInterface> {
     try {
       const items = await this.prisma.items.findMany({
         where: {
@@ -129,7 +129,7 @@ export class ItemService {
    * @param itemId Unique identifier for item to be retrieved
    * @returns {Promise<ServiceInterface>}
    */
-  async getItemById(itemId: string): Promise<ServiceInterface<items>> {
+  async getItemById(itemId: string): Promise<ServiceInterface> {
     try {
       const item = await this.prisma.items.findUnique({
         where: {
@@ -155,12 +155,12 @@ export class ItemService {
    *
    * @param itemId Item's unique ID
    * @param dto data to update item with
-   * @returns {Promise<ServiceInterface<items>>}
+   * @returns {Promise<ServiceInterface>}
    */
   async updateItemById(
     itemId: string,
     dto: UpdateItemDto,
-  ): Promise<ServiceInterface<items>> {
+  ): Promise<ServiceInterface> {
     try {
       const checkItemExists = await this.prisma.items.findUnique({
         where: {
@@ -192,7 +192,7 @@ export class ItemService {
     }
   }
 
-  async deleteItem(itemId: string) {
+  async deleteItem(itemId: string): Promise<ServiceInterface> {
     try {
       const checkItemExists = await this.prisma.items.findUnique({
         where: {
