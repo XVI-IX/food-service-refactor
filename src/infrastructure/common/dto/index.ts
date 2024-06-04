@@ -5,3 +5,5 @@ export * from './orders';
 export * from './stores';
 export * from './transactions';
 export * from './timeslots';
+export * from './reviews';
+export * from './notifications';

@@ -9,3 +9,4 @@ export * from './timeslot.interface';
 export * from './transactions.interface';
 export * from './items.interface';
 export * from './response.interface';
+export * from './reviews.interface';
