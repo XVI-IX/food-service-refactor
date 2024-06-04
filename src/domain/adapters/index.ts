@@ -4,3 +4,8 @@ export * from './vendors.interface';
 export * from './email.interface';
 export * from './orders.interface';
 export * from './orderItems.interface';
+export * from './customer.interface';
+export * from './timeslot.interface';
+export * from './transactions.interface';
+export * from './items.interface';
+export * from './response.interface';

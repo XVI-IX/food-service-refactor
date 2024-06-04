@@ -9,9 +9,10 @@ import { transactions } from '@prisma/client';
 import { ServiceInterface } from 'src/domain/adapters';
 import { CreateTransactionDto } from 'src/infrastructure/common/dto';
 import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
+import { ITransactionService } from '../../../domain/adapters';
 
 @Injectable()
-export class TransactionsService {
+export class TransactionsService implements ITransactionService {
   private logger: Logger;
 
   constructor(private readonly prisma: PrismaService) {
