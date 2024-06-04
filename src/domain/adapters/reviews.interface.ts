@@ -1,3 +1,7 @@
+import {
+  CreateItemReviewDto,
+  CreateStoreReviewDto,
+} from 'src/infrastructure/common/dto';
 import { IBase } from './base.interface';
 import { IResponse } from './response.interface';
 
@@ -18,7 +22,13 @@ export interface IReviewsService {
   getReviewById(reviewId: string): Promise<IReviewsResponse>;
   getAllStoreReviews(storeId: string): Promise<IReviewsResponse>;
   getAllItemReviews(itemId: string): Promise<IReviewsResponse>;
-  addStoreReview(storeId: string): Promise<IReviewsResponse>;
-  addItemReview(itemId: string): Promise<IReviewsResponse>;
+  addStoreReview(
+    storeId: string,
+    dto: CreateStoreReviewDto,
+  ): Promise<IReviewsResponse>;
+  addItemReview(
+    itemId: string,
+    dto: CreateItemReviewDto,
+  ): Promise<IReviewsResponse>;
   deleteReview(reviewId: string): Promise<IReviewsResponse>;
 }
