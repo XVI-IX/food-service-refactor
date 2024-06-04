@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
   Logger,
@@ -123,7 +124,7 @@ export class TimeslotService {
       });
 
       if (!timeslot) {
-        throw new UnprocessableEntityException('Timeslot could not be updated');
+        throw new BadRequestException('Timeslot could not be updated');
       }
 
       return {

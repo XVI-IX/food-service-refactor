@@ -27,7 +27,7 @@
     "@nestjs/event-emitter": "^2.0.4",
     "@nestjs/jwt": "^10.2.0",
     "@nestjs/platform-express": "^10.0.0",
-    "@prisma/client": "^5.13.0",
+    "@prisma/client": "^5.14.0",
     "argon2": "^0.40.1",
     "bull": "^4.12.8",
     "class-transformer": "^0.5.1",

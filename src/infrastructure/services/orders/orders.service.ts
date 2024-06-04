@@ -286,6 +286,28 @@ export class OrderService {
         where: {
           id: orderId,
         },
+        select: {
+          id: true,
+          userId: true,
+          storeId: true,
+          deliveryLocation: true,
+          deliveryStatus: true,
+          orderReference: true,
+          deliveryInstructions: true,
+          subTotalPrice: true,
+          paymentMethod: true,
+          estimatedDeliveryTime: true,
+          promoCode: true,
+          taxAmount: true,
+          deliveryFee: true,
+          orderHistory: true,
+          orderItems: true,
+          transactions: true,
+          feedback: true,
+          rating: true,
+          cancellationReason: true,
+          timeslotId: true,
+        }
       });
 
       if (!order) {

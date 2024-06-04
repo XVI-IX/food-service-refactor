@@ -55,23 +55,23 @@ enum PaymentStatusEnum {
 }
 
 model users {
-  id                   String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id                   String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userName             String
   firstName            String
   otherName            String?
   lastName             String
   phone                String
-  email                String         @unique
+  email                String          @unique
   password             String
   google_id            String?
-  role                 userRole       @default(customer)
-  verified             Boolean        @default(false)
-  verificationToken    String?        @unique
+  role                 userRole        @default(customer)
+  verified             Boolean         @default(false)
+  verificationToken    String?         @unique
   resetToken           String?
   resetTokenExpiration String?
-  createdAt            DateTime       @default(now()) @db.Timestamp(6)
-  updatedAt            DateTime       @updatedAt
-  status               genericStatus? @default(pending)
+  createdAt            DateTime        @default(now()) @db.Timestamp(6)
+  updatedAt            DateTime        @updatedAt
+  status               genericStatus?  @default(pending)
   businessAddress      String?
   recipientCode        String?
   stores               stores[]
@@ -79,6 +79,7 @@ model users {
   orderHistory         orderHistory[]
   transactions         transactions[]
   userSettings         userSettings[]
+  notifications        notifications[]
 }
 
 model userSettings {
@@ -224,4 +225,16 @@ model revokedToken {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   token     String   @unique
   revokedAt DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model notifications {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title       String
+  description String
+  read        Boolean  @default(false)
+  createdAt   DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt
+
+  user   users  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @db.Uuid
 }
