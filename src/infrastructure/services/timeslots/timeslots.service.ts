@@ -6,8 +6,8 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { timeslots } from '@prisma/client';
 import { ServiceInterface } from 'src/domain/adapters';
+import { ITimeslotService } from 'src/domain/adapters/timeslot.interface';
 import {
   CreateTimeslotDto,
   UpdateTimeslotDto,
@@ -15,16 +15,14 @@ import {
 import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
 
 @Injectable()
-export class TimeslotService {
+export class TimeslotService implements ITimeslotService {
   private readonly logger: Logger;
 
   constructor(private readonly prisma: PrismaService) {
     this.logger = new Logger(TimeslotService.name);
   }
 
-  async createTimeslot(
-    dto: CreateTimeslotDto,
-  ): Promise<ServiceInterface<timeslots>> {
+  async createTimeslot(dto: CreateTimeslotDto): Promise<ServiceInterface> {
     try {
       const timeslot = await this.prisma.timeslots.create({
         data: {
@@ -50,7 +48,7 @@ export class TimeslotService {
     }
   }
 
-  async getAllTimeslots(): Promise<ServiceInterface<timeslots[]>> {
+  async getAllTimeslots(): Promise<ServiceInterface> {
     try {
       const timeslots = await this.prisma.timeslots.findMany();
 
@@ -69,9 +67,7 @@ export class TimeslotService {
     }
   }
 
-  async getTimeslotById(
-    timeslotId: string,
-  ): Promise<ServiceInterface<timeslots>> {
+  async getTimeslotById(timeslotId: string): Promise<ServiceInterface> {
     try {
       const timeslot = await this.prisma.timeslots.findUnique({
         where: {
@@ -97,7 +93,7 @@ export class TimeslotService {
   async updateTimeslot(
     timeslotId: string,
     dto: UpdateTimeslotDto,
-  ): Promise<ServiceInterface<timeslots>> {
+  ): Promise<ServiceInterface> {
     try {
       const timeslotExists = await this.prisma.timeslots.findUnique({
         where: {
@@ -136,9 +132,7 @@ export class TimeslotService {
     }
   }
 
-  async deleteTimeslotById(
-    timeslotId: string,
-  ): Promise<ServiceInterface<timeslots>> {
+  async deleteTimeslotById(timeslotId: string): Promise<ServiceInterface> {
     try {
       const timeslot = await this.prisma.timeslots.delete({
         where: {
@@ -159,7 +153,7 @@ export class TimeslotService {
     }
   }
 
-  async deleteAllTimeslots(): Promise<ServiceInterface<null>> {
+  async deleteAllTimeslots(): Promise<ServiceInterface> {
     try {
       const timeslots = await this.prisma.timeslots.deleteMany();
 
@@ -178,7 +172,7 @@ export class TimeslotService {
     }
   }
 
-  // private createDynamicTimeslot(): Promise<ServiceInterface<timeslots>> {
+  // private createDynamicTimeslot(): Promise<ServiceInterface> {
   //   try {
   //   } catch (error) {
   //     this.logger.error(error);

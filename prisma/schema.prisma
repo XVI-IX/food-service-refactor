@@ -80,6 +80,7 @@ model users {
   transactions         transactions[]
   userSettings         userSettings[]
   notifications        notifications[]
+  reviews              reviews[]
 }
 
 model userSettings {
@@ -119,6 +120,7 @@ model stores {
   items                     items[]
   orders                    orders[]
   transactions              transactions[]
+  reviews                   reviews[]
 }
 
 model items {
@@ -137,6 +139,7 @@ model items {
   createdAt   DateTime     @default(now()) @db.Timestamp(6)
   updatedAt   DateTime     @updatedAt
   orderItems  orderItems[]
+  reviews     reviews[]
 }
 
 model orders {
@@ -201,6 +204,9 @@ model timeslots {
   isAvailable     Boolean  @default(true)
   orders          orders[]
 
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt
+
   @@unique([startTime, endTime])
 }
 
@@ -239,4 +245,19 @@ model notifications {
 
   user   users  @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String @db.Uuid
+}
+
+model reviews {
+  id      String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  content String @db.Text
+  rating  Float? @default(0) @db.DoublePrecision
+
+  user       users  @relation(fields: [reviewerId], references: [id], onDelete: SetDefault)
+  reviewerId String @db.Uuid
+
+  store   stores? @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  storeId String? @db.Uuid
+
+  item   items?  @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  itemId String? @db.Uuid
 }
