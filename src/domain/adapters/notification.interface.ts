@@ -32,12 +32,16 @@ export interface INotificationService {
     userId: string,
     dto: CreateNotificationDto,
   ): Promise<ServiceInterface<INotification>>;
-  createNotificationsForAllUsers(
+  createNotificationForStore(
+    storeId: string,
     dto: CreateNotificationDto,
   ): Promise<ServiceInterface<INotification>>;
-  deleteNotificationByIdForUser(
-    userId: string,
-  ): Promise<ServiceInterface<INotification>>;
+  // createNotificationsForAllUsers(
+  //   dto: CreateNotificationDto,
+  // ): Promise<ServiceInterface<INotification>>;
+  // deleteNotificationByIdForUser(
+  //   userId: string,
+  // ): Promise<ServiceInterface<INotification>>;
   deleteAllNotificationsForUser(
     userId: string,
   ): Promise<ServiceInterface<INotification>>;

@@ -6,6 +6,7 @@ import { OrderModule } from '../services/orders/orders.module';
 import { StoreModule } from '../services/stores/stores.module';
 import { TimeslotModule } from '../services/timeslots/timeslots.module';
 import { TransactionsModule } from '../services/transactions/transactions.module';
+import { NotificationModule } from '../services/notifications/notification.module';
 import { AuthController } from './auth/auth.controller';
 import { CustomerController } from './customers/customers.controller';
 import { ItemsController } from './items/items.controllers';
@@ -13,6 +14,7 @@ import { OrdersController } from './orders/orders.controllers';
 import { StoreController } from './stores/store.controllers';
 import { TimeslotController } from './timeslots/timeslots.controller';
 import { TransactionsController } from './transactions/transactions.controller';
+import { NotificationController } from './notifications/notifications.controller';
 
 @Module({
   imports: [
@@ -23,6 +25,7 @@ import { TransactionsController } from './transactions/transactions.controller';
     StoreModule,
     TimeslotModule,
     TransactionsModule,
+    NotificationModule,
   ],
   controllers: [
     AuthController,
@@ -32,6 +35,7 @@ import { TransactionsController } from './transactions/transactions.controller';
     StoreController,
     TimeslotController,
     TransactionsController,
+    NotificationController,
   ],
   providers: [],
 })
