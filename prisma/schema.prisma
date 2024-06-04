@@ -92,9 +92,9 @@ model userSettings {
 }
 
 model stores {
-  id                        String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  user                      users          @relation(fields: [userId], references: [id])
-  userId                    String         @db.Uuid
+  id                        String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user                      users           @relation(fields: [userId], references: [id])
+  userId                    String          @db.Uuid
   name                      String
   address                   String
   phone                     String
@@ -106,21 +106,22 @@ model stores {
   description               String
   openingHours              String?
   deliveryRadius            Float?
-  deliveryFee               Float?         @default(0)
-  minOrderAmountForDelivery Float?         @default(0)
+  deliveryFee               Float?          @default(0)
+  minOrderAmountForDelivery Float?          @default(0)
   latitude                  Float?
   longitude                 Float?
-  active                    Boolean?       @default(false)
-  status                    genericStatus  @default(pending)
-  createdAt                 DateTime       @default(now()) @db.Timestamp(6)
-  updatedAt                 DateTime       @updatedAt
+  active                    Boolean?        @default(false)
+  status                    genericStatus   @default(pending)
+  createdAt                 DateTime        @default(now()) @db.Timestamp(6)
+  updatedAt                 DateTime        @updatedAt
   avgRating                 Float?
   totalReviews              Int?
-  isOpen                    Boolean?       @default(true)
+  isOpen                    Boolean?        @default(true)
   items                     items[]
   orders                    orders[]
   transactions              transactions[]
   reviews                   reviews[]
+  notifications             notifications[]
 }
 
 model items {
@@ -243,8 +244,11 @@ model notifications {
   createdAt   DateTime @default(now()) @db.Timestamptz(6)
   updatedAt   DateTime @updatedAt
 
-  user   users  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId String @db.Uuid
+  user   users?  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String? @db.Uuid
+
+  store   stores? @relation(fields: [storeId], references: [id], onDelete: SetNull)
+  storeId String? @db.Uuid
 }
 
 model reviews {

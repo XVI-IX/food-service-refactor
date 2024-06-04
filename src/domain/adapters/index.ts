@@ -10,3 +10,4 @@ export * from './transactions.interface';
 export * from './items.interface';
 export * from './response.interface';
 export * from './reviews.interface';
+export * from './notification.interface';
