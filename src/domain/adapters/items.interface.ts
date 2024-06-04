@@ -1,6 +1,7 @@
 import { CreateItemDto, UpdateItemDto } from 'src/infrastructure/common/dto';
 import { IBase } from './base.interface';
 import { IResponse } from './response.interface';
+import { IOrderItems } from './orderItems.interface';
 
 export interface IItems extends IBase {
   storeId: string;
@@ -13,7 +14,7 @@ export interface IItems extends IBase {
   portionSize?: string;
   allergens: string[];
   tags: string[];
-  orderItems: any[];
+  orderItems: IOrderItems[];
 }
 
 export interface IItemsResponse extends IResponse {

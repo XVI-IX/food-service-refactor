@@ -1,8 +1,18 @@
 import { IBase } from './base.interface';
+import { IResponse } from './response.interface';
 
 export interface IOrderItems extends IBase {
-  order_id: number;
-  item_id: number;
+  orderId: string;
+  itemId: string;
   quantity: number;
-  price: number;
+  totalItemPrice?: number;
+  price?: number;
 }
+
+export interface IOrderItemsResponse extends IResponse {
+  data?: IOrderItems | IOrderItems[];
+}
+
+// export interface IOrderItemsService {
+
+// }

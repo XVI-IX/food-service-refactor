@@ -179,14 +179,16 @@ model orderHistory {
 }
 
 model orderItems {
-  id             String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  order          orders @relation(fields: [orderId], references: [id])
-  orderId        String @db.Uuid
-  item           items  @relation(fields: [itemId], references: [id])
-  itemId         String @db.Uuid
-  quantity       Int    @default(1)
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  order          orders   @relation(fields: [orderId], references: [id])
+  orderId        String   @db.Uuid
+  item           items    @relation(fields: [itemId], references: [id])
+  itemId         String   @db.Uuid
+  quantity       Int      @default(1)
   totalItemPrice Float?
-  price          Float
+  price          Float?
+  createdAt      DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt      DateTime @updatedAt
 }
 
 model timeslots {

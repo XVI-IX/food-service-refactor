@@ -5,8 +5,8 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { stores } from '@prisma/client';
 import { ServiceInterface } from 'src/domain/adapters';
+import { IStoreService } from 'src/domain/adapters/stores.interface';
 import { IAuthUser } from 'src/infrastructure/common/decorators';
 import { CreateStoreDto } from 'src/infrastructure/common/dto';
 import { UpdateStoreDto } from 'src/infrastructure/common/dto/stores/updateStore.dto';
@@ -14,7 +14,7 @@ import { envConfig } from 'src/infrastructure/config/environment.config';
 import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
 
 @Injectable()
-export class StoreService {
+export class StoreService implements IStoreService {
   private logger: Logger;
 
   constructor(private readonly prisma: PrismaService) {
@@ -24,7 +24,7 @@ export class StoreService {
   async createStore(
     user: IAuthUser,
     dto: CreateStoreDto,
-  ): Promise<ServiceInterface<stores>> {
+  ): Promise<ServiceInterface> {
     try {
       const store = await this.prisma.stores.create({
         data: {
@@ -79,7 +79,7 @@ export class StoreService {
     }
   }
 
-  async getAllStores(page: number = 1): Promise<ServiceInterface<stores[]>> {
+  async getAllStores(page: number = 1): Promise<ServiceInterface> {
     try {
       const stores = await this.prisma.stores.findMany({
         skip: (page - 1) * envConfig.getPaginationLimit(),
@@ -103,7 +103,7 @@ export class StoreService {
   async getAllUserStores(
     userId: string,
     page: number = 1,
-  ): Promise<ServiceInterface<stores[]>> {
+  ): Promise<ServiceInterface> {
     try {
       const userStores = await this.prisma.stores.findMany({
         where: {
@@ -129,7 +129,7 @@ export class StoreService {
     }
   }
 
-  async getStoreById(storeId: string): Promise<ServiceInterface<stores>> {
+  async getStoreById(storeId: string): Promise<ServiceInterface> {
     try {
       const store = await this.prisma.stores.findUnique({
         where: {
@@ -153,7 +153,7 @@ export class StoreService {
   async updateStore(
     storeId: string,
     dto: UpdateStoreDto,
-  ): Promise<ServiceInterface<stores>> {
+  ): Promise<ServiceInterface> {
     try {
       const updatedStore = await this.prisma.stores.update({
         where: {
@@ -175,7 +175,7 @@ export class StoreService {
     }
   }
 
-  async deleteStore(storeId: string): Promise<ServiceInterface<stores>> {
+  async deleteStore(storeId: string): Promise<ServiceInterface> {
     try {
       const checkStoreOrders = await this.prisma.orders.findMany({
         where: {
