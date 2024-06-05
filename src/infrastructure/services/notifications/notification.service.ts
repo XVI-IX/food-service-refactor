@@ -241,4 +241,27 @@ export class NotificationService implements INotificationService {
       throw error;
     }
   }
+
+  async deleteNotificationById(
+    notificationId: string,
+  ): Promise<ServiceInterface<any>> {
+    try {
+      const notification = await this.prisma.notifications.delete({
+        where: {
+          id: notificationId,
+        },
+      });
+
+      if (!notification) {
+        throw new BadRequestException('Notification could not be deleted');
+      }
+
+      return {
+        data: notification,
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw error;
+    }
+  }
 }

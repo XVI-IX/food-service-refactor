@@ -45,4 +45,5 @@ export interface INotificationService {
   deleteAllNotificationsForUser(
     userId: string,
   ): Promise<ServiceInterface<INotification>>;
+  deleteNotificationById(notificationId: string): Promise<ServiceInterface>;
 }
