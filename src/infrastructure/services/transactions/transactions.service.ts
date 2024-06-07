@@ -5,7 +5,6 @@ import {
   Logger,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { transactions } from '@prisma/client';
 import { ServiceInterface } from 'src/domain/adapters';
 import { CreateTransactionDto } from 'src/infrastructure/common/dto';
 import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
@@ -19,7 +18,7 @@ export class TransactionsService implements ITransactionService {
     this.logger = new Logger(TransactionsService.name);
   }
 
-  async getAllTransactions(): Promise<ServiceInterface<transactions[]>> {
+  async getAllTransactions(): Promise<ServiceInterface> {
     try {
       const transactions = await this.prisma.transactions.findMany();
 
@@ -38,9 +37,7 @@ export class TransactionsService implements ITransactionService {
     }
   }
 
-  async getTransactionById(
-    transactionId: string,
-  ): Promise<ServiceInterface<transactions>> {
+  async getTransactionById(transactionId: string): Promise<ServiceInterface> {
     try {
       const transaction = await this.prisma.transactions.findUnique({
         where: {
@@ -63,9 +60,7 @@ export class TransactionsService implements ITransactionService {
     }
   }
 
-  async addTransaction(
-    dto: CreateTransactionDto,
-  ): Promise<ServiceInterface<transactions>> {
+  async addTransaction(dto: CreateTransactionDto): Promise<ServiceInterface> {
     try {
       const transaction = await this.prisma.transactions.create({
         data: {
@@ -109,9 +104,7 @@ export class TransactionsService implements ITransactionService {
     }
   }
 
-  async getAllUsersTransactions(
-    userId: string,
-  ): Promise<ServiceInterface<transactions[]>> {
+  async getAllUsersTransactions(userId: string): Promise<ServiceInterface> {
     try {
       const userTransactions = await this.prisma.transactions.findMany({
         where: {
@@ -134,9 +127,7 @@ export class TransactionsService implements ITransactionService {
     }
   }
 
-  async getAllStoreTransactions(
-    storeId: string,
-  ): Promise<ServiceInterface<transactions[]>> {
+  async getAllStoreTransactions(storeId: string): Promise<ServiceInterface> {
     try {
       const storeTransactions = await this.prisma.transactions.findMany({
         where: {
@@ -159,9 +150,7 @@ export class TransactionsService implements ITransactionService {
     }
   }
 
-  async getAllOrderTransactions(
-    orderId: string,
-  ): Promise<ServiceInterface<transactions[]>> {
+  async getAllOrderTransactions(orderId: string): Promise<ServiceInterface> {
     try {
       const orderTransactions = await this.prisma.transactions.findMany({
         where: {

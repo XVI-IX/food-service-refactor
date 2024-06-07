@@ -84,15 +84,19 @@ export class AuthService {
 
       delete user.password;
 
-      const data: IEmail = {
+      const emailData: IEmail = {
         to: user.email,
         data: {
           userName: user.userName,
           token: user.verificationToken,
         },
       };
-      this.emitter.emit('sendWelcomeEmail', data);
-      this.emitter.emit('sendVerificationEmail', data);
+      const data = {
+        userId: user.id,
+      };
+      this.emitter.emit('sendWelcomeEmail', emailData);
+      this.emitter.emit('sendVerificationEmail', emailData);
+      this.emitter.emit('UserRegisteration', data);
 
       return {
         data: user,

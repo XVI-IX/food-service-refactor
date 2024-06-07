@@ -7,3 +7,4 @@ export * from './transactions';
 export * from './timeslots';
 export * from './reviews';
 export * from './notifications';
+export * from './settings';
