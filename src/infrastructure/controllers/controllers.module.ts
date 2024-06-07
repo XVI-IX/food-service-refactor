@@ -16,6 +16,7 @@ import { TimeslotController } from './timeslots/timeslots.controller';
 import { TransactionsController } from './transactions/transactions.controller';
 import { NotificationController } from './notifications/notifications.controller';
 import { SettingsController } from './settings/settings.controllers';
+import { SettingsModule } from '../services/settings/settings.module';
 
 @Module({
   imports: [
@@ -27,7 +28,7 @@ import { SettingsController } from './settings/settings.controllers';
     TimeslotModule,
     TransactionsModule,
     NotificationModule,
-    SettingsController,
+    SettingsModule,
   ],
   controllers: [
     AuthController,
