@@ -30,5 +30,5 @@ export interface ITimeslotService {
   deleteTimeslotById(timeslotId: string): Promise<ITimeslotResponse>;
   deleteAllTimeslots(): Promise<ITimeslotResponse>;
   createTimeslot(dto: CreateTimeslotDto): Promise<ITimeslotResponse>;
-  // createDynamicTimeslot(): Promise<ITimeslotResponse>;
+  createDynamicTimeslot(orderId: string): Promise<ITimeslotResponse>;
 }

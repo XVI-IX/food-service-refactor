@@ -175,6 +175,9 @@ model orders {
   orderHistory          orderHistory[]
   orderItems            orderItems[]
   transactions          transactions[]
+
+  createdAt             DateTime        @default(now()) @db.Timestamptz(6)
+  updatedAt            DateTime        @default(now()) @updatedAt
 }
 
 model orderHistory {
@@ -207,7 +210,7 @@ model timeslots {
   id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   startTime       DateTime @db.Timestamp(6)
   endTime         DateTime @db.Timestamp(6)
-  timezone        String
+  timezone        String?
   orderCount      Int?     @default(0)
   currentCapacity Int?     @default(0)
   isAvailable     Boolean  @default(true)

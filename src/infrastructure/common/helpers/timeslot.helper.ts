@@ -5,8 +5,6 @@ interface Location {
   longitude: string;
 }
 
-// d = 2 * R * arcsin( sqrt( sin( (lat2 - lat1) * π/180 / 2 )^2 + cos( lat1 * π/180 ) * cos( lat2 * π/180 ) * sin( (lon2 - lon1) * π/180 / 2 )^2 ) )
-
 export class TimeslotHelper {
   haversineDistance(
     centerPointLocation: Location,

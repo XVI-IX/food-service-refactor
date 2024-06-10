@@ -6,6 +6,7 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
+import moment from 'moment';
 import { ServiceInterface } from 'src/domain/adapters';
 import { ITimeslotService } from 'src/domain/adapters/timeslot.interface';
 import {
@@ -172,11 +173,87 @@ export class TimeslotService implements ITimeslotService {
     }
   }
 
-  // private createDynamicTimeslot(): Promise<ServiceInterface> {
-  //   try {
-  //   } catch (error) {
-  //     this.logger.error(error);
-  //     throw error;
-  //   }
-  // }
+  async createDynamicTimeslot(orderId: string): Promise<ServiceInterface> {
+    try {
+      const getConfirmedOrder = await this.prisma.orders.findUnique({
+        where: {
+          id: orderId,
+          deliveryStatus: 'confirmed',
+        },
+      });
+
+      if (!getConfirmedOrder) {
+        throw new BadRequestException('Confirmed order could not be retrieved');
+      }
+
+      const timeslotExists = await this.prisma.timeslots.findFirst({
+        where: {
+          startTime: moment(getConfirmedOrder.updatedAt)
+            .add(1, 'hour')
+            .toDate(),
+          endTime: moment(getConfirmedOrder.updatedAt).add(2, 'hour').toDate(),
+        },
+      });
+
+      if (timeslotExists) {
+        const updateOrder = await this.prisma.orders.update({
+          where: {
+            id: orderId,
+          },
+          data: {
+            timeslot: {
+              connect: {
+                id: timeslotExists.id,
+              },
+            },
+          },
+        });
+
+        if (!updateOrder) {
+          throw new BadRequestException('Order timeslot could not be updated');
+        }
+
+        return {
+          data: updateOrder,
+        };
+      }
+
+      const newTimeslot = await this.prisma.timeslots.create({
+        data: {
+          startTime: moment(getConfirmedOrder.updatedAt)
+            .add(1, 'hour')
+            .toDate(),
+          endTime: moment(getConfirmedOrder.updatedAt).add(2, 'hour').toDate(),
+        },
+      });
+
+      if (!newTimeslot) {
+        throw new BadRequestException('Timeslot could not be created');
+      }
+
+      const updatedOrder = await this.prisma.orders.update({
+        where: {
+          id: orderId,
+        },
+        data: {
+          timeslot: {
+            connect: {
+              id: newTimeslot.id,
+            },
+          },
+        },
+      });
+
+      if (!updatedOrder) {
+        throw new BadRequestException('Order timeslot could not be updated');
+      }
+
+      return {
+        data: updatedOrder,
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw error;
+    }
+  }
 }
