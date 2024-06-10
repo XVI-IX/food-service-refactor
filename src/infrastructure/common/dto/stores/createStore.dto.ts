@@ -1,5 +1,8 @@
 import {
   IsEmail,
+  IsLatitude,
+  IsLatLong,
+  IsLongitude,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -65,11 +68,13 @@ export class CreateStoreDto {
   @IsOptional()
   minOrderAmountForDelivery?: number;
 
-  @IsNumber()
+  @IsLatitude()
+  @IsString()
   @IsOptional()
-  latitude?: number;
+  latitude?: string;
 
-  @IsNumber()
+  @IsLongitude()
   @IsOptional()
-  longitude?: number;
+  @IsString()
+  longitude?: string;
 }
