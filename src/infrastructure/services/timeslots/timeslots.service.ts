@@ -6,9 +6,13 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import moment from 'moment';
 import { ServiceInterface } from 'src/domain/adapters';
-import { ITimeslotService } from 'src/domain/adapters/timeslot.interface';
+import {
+  ITimeslotEvent,
+  ITimeslotService,
+} from 'src/domain/adapters/timeslot.interface';
 import {
   CreateTimeslotDto,
   UpdateTimeslotDto,
@@ -19,7 +23,10 @@ import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
 export class TimeslotService implements ITimeslotService {
   private readonly logger: Logger;
 
-  constructor(private readonly prisma: PrismaService) {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly emitter: EventEmitter2,
+  ) {
     this.logger = new Logger(TimeslotService.name);
   }
 
@@ -186,12 +193,21 @@ export class TimeslotService implements ITimeslotService {
         throw new BadRequestException('Confirmed order could not be retrieved');
       }
 
+      const oneHourFromConfirmation = moment(getConfirmedOrder.updatedAt)
+        .add(1, 'hour')
+        .toDate();
+      const twoHourFromConfirmation = moment(getConfirmedOrder.updatedAt)
+        .add(2, 'hour')
+        .toDate();
+
       const timeslotExists = await this.prisma.timeslots.findFirst({
         where: {
-          startTime: moment(getConfirmedOrder.updatedAt)
-            .add(1, 'hour')
-            .toDate(),
-          endTime: moment(getConfirmedOrder.updatedAt).add(2, 'hour').toDate(),
+          startTime: oneHourFromConfirmation,
+          endTime: twoHourFromConfirmation,
+          isAvailable: true,
+          currentCapacity: {
+            gt: 0,
+          },
         },
       });
 
@@ -213,6 +229,20 @@ export class TimeslotService implements ITimeslotService {
           throw new BadRequestException('Order timeslot could not be updated');
         }
 
+        await this.prisma.timeslots.update({
+          where: {
+            id: timeslotExists.id,
+          },
+          data: {
+            currentCapacity: {
+              decrement: 1,
+            },
+            orderCount: {
+              increment: 1,
+            },
+          },
+        });
+
         return {
           data: updateOrder,
         };
@@ -221,9 +251,11 @@ export class TimeslotService implements ITimeslotService {
       const newTimeslot = await this.prisma.timeslots.create({
         data: {
           startTime: moment(getConfirmedOrder.updatedAt)
-            .add(1, 'hour')
+            .add(1.5, 'hour')
             .toDate(),
-          endTime: moment(getConfirmedOrder.updatedAt).add(2, 'hour').toDate(),
+          endTime: moment(getConfirmedOrder.updatedAt)
+            .add(2.5, 'hour')
+            .toDate(),
         },
       });
 
@@ -248,12 +280,45 @@ export class TimeslotService implements ITimeslotService {
         throw new BadRequestException('Order timeslot could not be updated');
       }
 
+      await this.prisma.timeslots.update({
+        where: {
+          id: newTimeslot.id,
+        },
+        data: {
+          orderCount: {
+            increment: 1,
+          },
+          currentCapacity: {
+            decrement: 1,
+          },
+        },
+      });
+
       return {
         data: updatedOrder,
       };
     } catch (error) {
       this.logger.error(error);
       throw error;
+    }
+  }
+
+  @OnEvent('order.confirmed')
+  async onOrderConfirmed(
+    payload: ITimeslotEvent,
+  ): Promise<ServiceInterface<any>> {
+    try {
+      const event = await this.createDynamicTimeslot(payload.orderId);
+
+      if (!event) {
+        throw new BadRequestException('timeslot could not be created');
+      }
+
+      return {
+        data: event,
+      };
+    } catch (error) {
+      this.logger.error(error);
     }
   }
 }

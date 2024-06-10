@@ -212,7 +212,7 @@ model timeslots {
   endTime         DateTime @db.Timestamp(6)
   timezone        String?
   orderCount      Int?     @default(0)
-  currentCapacity Int?     @default(0)
+  currentCapacity Int?     @default(100)
   isAvailable     Boolean  @default(true)
   orders          orders[]
 
