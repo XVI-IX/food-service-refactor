@@ -74,6 +74,8 @@ model users {
   status               genericStatus?  @default(pending)
   businessAddress      String?
   recipientCode        String?
+  latitude             String?
+  longitude            String?
   stores               stores[]
   orders               orders[]
   orderHistory         orderHistory[]
@@ -114,8 +116,8 @@ model stores {
   deliveryRadius            Float?
   deliveryFee               Float?          @default(0)
   minOrderAmountForDelivery Float?          @default(0)
-  latitude                  Float?
-  longitude                 Float?
+  latitude                  String?
+  longitude                 String?
   active                    Boolean?        @default(false)
   status                    genericStatus   @default(pending)
   createdAt                 DateTime        @default(now()) @db.Timestamp(6)

@@ -13,4 +13,7 @@ export interface IEnvironmentInterface {
   getPaystackKey(): string;
   getJwtExpiration(): string;
   getPaginationLimit(): number;
+  getOpensourceMapsKey(): string;
+  getOpenRouteUrl(): string;
+  getEarthRadius(): number;
 }

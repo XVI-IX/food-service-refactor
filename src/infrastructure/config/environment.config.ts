@@ -64,6 +64,18 @@ class EnvironmentConfig implements IEnvironmentInterface {
   getPaginationLimit(): number {
     return env.get('PAGINATION_LIMIT').asInt();
   }
+
+  getOpensourceMapsKey(): string {
+    return env.get('OPENSOURCEMAPS').asString();
+  }
+
+  getOpenRouteUrl(): string {
+    return env.get('OPEN_ROUTE_URL').asString();
+  }
+
+  getEarthRadius(): number {
+    return env.get('EARTH_RADIUS').asInt();
+  }
 }
 
 export const envConfig = new EnvironmentConfig();

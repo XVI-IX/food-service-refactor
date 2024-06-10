@@ -153,11 +153,7 @@ export class SettingsService implements ISettingsService {
   @OnEvent('UserRegisteration')
   async onUserRegistered(payload: any) {
     try {
-      const settings = await this.createUserSettings(payload.userId);
-
-      if (!settings) {
-        this.logger.error('User settings could not be created');
-      }
+      await this.createUserSettings(payload.userId);
 
       return true;
     } catch (error) {

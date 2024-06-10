@@ -39,8 +39,6 @@ export class AuthGuard implements CanActivate {
         secret: envConfig.getJWTSecret(),
       });
 
-      console.log(payload);
-
       request['user'] = payload;
     } catch (error) {
       throw new UnauthorizedException('Please log in');

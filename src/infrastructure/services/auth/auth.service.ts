@@ -146,6 +146,10 @@ export class AuthService {
     try {
       const checkExists = await this.checkUser(dto.email);
 
+      if (!checkExists) {
+        throw new NotFoundException('User with email not found');
+      }
+
       const checkPassword = await argon.verify(
         checkExists.password,
         dto.password,
