@@ -1,6 +1,7 @@
 import { CreateOrderDto, UpdateOrderDto } from 'src/infrastructure/common/dto';
 import { IBase } from './base.interface';
 import { IOrderItems } from './orderItems.interface';
+import { ServiceInterface } from './service.interface';
 
 export interface IOrders extends IBase {
   userId: string;
@@ -32,16 +33,17 @@ export interface IOrderResponse {
 }
 
 export interface IOrderService {
-  createOrder(userId: string, dto: CreateOrderDto): Promise<IOrderResponse>;
-  getAllOrders(page?: number): Promise<IOrderResponse>;
-  getAllUserOrders(userId: string, page?: number): Promise<IOrderResponse>;
-  getAllStoreOrders(storeId: string, page?: number): Promise<IOrderResponse>;
-  getOrderItems(orderId: string, page?: number): Promise<IOrderResponse>;
-  getOrderById(orderId: string): Promise<IOrderResponse>;
+  createOrder(userId: string, dto: CreateOrderDto): Promise<ServiceInterface>;
+  getAllOrders(page?: number): Promise<ServiceInterface>;
+  getAllUserOrders(userId: string, page?: number): Promise<ServiceInterface>;
+  getAllStoreOrders(storeId: string, page?: number): Promise<ServiceInterface>;
+  getOrderItems(orderId: string, page?: number): Promise<ServiceInterface>;
+  getOrderById(orderId: string): Promise<ServiceInterface>;
   updateOrder(
     orderId: string,
     dto: UpdateOrderDto,
     userId: string,
-  ): Promise<IOrderResponse>;
-  cancelOrder(orderId: string, userId: string): Promise<IOrderResponse>;
+  ): Promise<ServiceInterface>;
+  cancelOrder(orderId: string, userId: string): Promise<ServiceInterface>;
+  confirmOrder(orderId: string): Promise<ServiceInterface>;
 }

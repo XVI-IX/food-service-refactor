@@ -4,5 +4,6 @@ export interface IEmail {
     userName?: string;
     token?: string;
     tokenExpiration?: string;
+    orderId?: string;
   };
 }

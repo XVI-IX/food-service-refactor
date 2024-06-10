@@ -5,8 +5,13 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-// import { orderItems, orders } from '@prisma/client';
-import { IOrders, IOrderService, ServiceInterface } from 'src/domain/adapters';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import {
+  IEmail,
+  IOrderService,
+  ITimeslotEvent,
+  ServiceInterface,
+} from 'src/domain/adapters';
 import { CreateOrderDto, UpdateOrderDto } from 'src/infrastructure/common/dto';
 import { envConfig } from 'src/infrastructure/config/environment.config';
 import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
@@ -15,7 +20,10 @@ import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
 export class OrderService implements IOrderService {
   private logger: Logger;
 
-  constructor(private readonly prisma: PrismaService) {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly eventEmitter: EventEmitter2,
+  ) {
     this.logger = new Logger(OrderService.name);
   }
 
@@ -380,6 +388,61 @@ export class OrderService implements IOrderService {
 
       return {
         data: updateOrder,
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw error;
+    }
+  }
+
+  async confirmOrder(orderId: string): Promise<ServiceInterface> {
+    try {
+      const orderExists = await this.prisma.orders.findUnique({
+        where: {
+          id: orderId,
+          deliveryStatus: {
+            notIn: ['cancelled', 'failed'],
+          },
+        },
+      });
+
+      if (!orderExists) {
+        throw new BadRequestException('Order could not be retrieved');
+      }
+
+      const confirmOrder = await this.prisma.orders.update({
+        where: {
+          id: orderId,
+        },
+        data: {
+          deliveryStatus: 'confirmed',
+        },
+        select: {
+          user: true,
+          id: true,
+        },
+      });
+
+      if (!confirmOrder) {
+        throw new BadRequestException('Order could not be confirmed');
+      }
+
+      const emailData: IEmail = {
+        to: confirmOrder.user.email,
+        data: {
+          userName: confirmOrder.user.userName,
+          orderId: confirmOrder.id,
+        },
+      };
+      this.eventEmitter.emit('order.confirmed.email', emailData);
+
+      const eventData: ITimeslotEvent = {
+        orderId: confirmOrder.id,
+      };
+      this.eventEmitter.emit('order.confirmed.event', eventData);
+
+      return {
+        data: confirmOrder,
       };
     } catch (error) {
       this.logger.error(error);

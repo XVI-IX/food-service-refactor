@@ -222,6 +222,7 @@ export class TimeslotService implements ITimeslotService {
                 id: timeslotExists.id,
               },
             },
+            deliveryStatus: 'in_progress',
           },
         });
 
@@ -273,6 +274,7 @@ export class TimeslotService implements ITimeslotService {
               id: newTimeslot.id,
             },
           },
+          deliveryStatus: 'in_progress',
         },
       });
 
@@ -303,7 +305,7 @@ export class TimeslotService implements ITimeslotService {
     }
   }
 
-  @OnEvent('order.confirmed')
+  @OnEvent('order.confirmed.event')
   async onOrderConfirmed(
     payload: ITimeslotEvent,
   ): Promise<ServiceInterface<any>> {
