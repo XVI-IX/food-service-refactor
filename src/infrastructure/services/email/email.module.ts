@@ -1,8 +1,7 @@
 import { MailerModule } from '@nestjs-modules/mailer';
 import { Module } from '@nestjs/common';
-import { strict } from 'assert';
 import { join } from 'path';
-import { envConfig } from 'src/infrastructure/config/environment.config';
+import { envConfig } from '../../config/environment.config';
 import { EjsAdapter } from '@nestjs-modules/mailer/dist/adapters/ejs.adapter';
 import { BullModule } from '@nestjs/bull';
 

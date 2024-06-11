@@ -12,9 +12,9 @@ import {
   ITimeslotEvent,
   ServiceInterface,
 } from 'src/domain/adapters';
-import { CreateOrderDto, UpdateOrderDto } from 'src/infrastructure/common/dto';
-import { envConfig } from 'src/infrastructure/config/environment.config';
-import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
+import { CreateOrderDto, UpdateOrderDto } from '../../common/dto';
+import { envConfig } from '../../config/environment.config';
+import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
 export class OrderService implements IOrderService {
@@ -32,6 +32,16 @@ export class OrderService implements IOrderService {
     dto: CreateOrderDto,
   ): Promise<ServiceInterface> {
     try {
+      const storeExists = await this.prisma.stores.findUnique({
+        where: {
+          id: dto.storeId,
+        },
+      });
+
+      if (!storeExists) {
+        throw new NotFoundException('Store with id not found');
+      }
+
       const order = await this.prisma.orders.create({
         data: {
           user: {

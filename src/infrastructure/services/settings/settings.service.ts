@@ -5,10 +5,10 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
-import { ServiceInterface } from 'src/domain/adapters';
-import { ISettingsService } from 'src/domain/adapters/settings.interface';
-import { UpdateUserSettingsDto } from 'src/infrastructure/common/dto';
-import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
+import { ServiceInterface } from '../../../domain/adapters';
+import { ISettingsService } from '../../../domain/adapters/settings.interface';
+import { UpdateUserSettingsDto } from '../../common/dto';
+import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
 export class SettingsService implements ISettingsService {

@@ -1,7 +1,6 @@
 import {
   IsEmail,
   IsLatitude,
-  IsLatLong,
   IsLongitude,
   IsNotEmpty,
   IsNumber,

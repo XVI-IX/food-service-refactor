@@ -1,6 +1,6 @@
 import { Process, Processor } from '@nestjs/bull';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { IEmail } from 'src/domain/adapters';
+import { IEmail } from '../../../domain/adapters';
 import { Job } from 'bull';
 import { MailerService } from '@nestjs-modules/mailer';
 

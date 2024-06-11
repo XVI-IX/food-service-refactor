@@ -7,8 +7,8 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { CreateUserDto } from 'src/infrastructure/common/dto/auth/createUser.dto';
-import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
+import { CreateUserDto } from '../../common/dto/auth/createUser.dto';
+import { PrismaService } from '../../prisma/prisma.service';
 import * as argon from 'argon2';
 import { randomBytes } from 'crypto';
 import { IEmail } from 'src/domain/adapters/email.interface';
@@ -17,12 +17,12 @@ import {
   LoginUserDto,
   ResetPasswordDto,
   VerifyEmailDto,
-} from 'src/infrastructure/common/dto';
+} from '../../common/dto';
 import { JsonWebTokenError, JwtService } from '@nestjs/jwt';
-import { envConfig } from 'src/infrastructure/config/environment.config';
-import { ServiceInterface } from 'src/domain/adapters';
+import { envConfig } from '../../config/environment.config';
+import { ServiceInterface } from '../../../domain/adapters';
 import { users } from '@prisma/client';
-import { IAuthUser } from 'src/infrastructure/common/decorators';
+import { IAuthUser } from '../../common/decorators';
 
 @Injectable()
 export class AuthService {

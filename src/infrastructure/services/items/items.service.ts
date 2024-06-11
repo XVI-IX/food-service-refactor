@@ -4,11 +4,11 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { ServiceInterface } from 'src/domain/adapters';
-import { IItemsService } from 'src/domain/adapters/items.interface';
-import { CreateItemDto, UpdateItemDto } from 'src/infrastructure/common/dto';
-import { envConfig } from 'src/infrastructure/config/environment.config';
-import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
+import { ServiceInterface } from '../../../domain/adapters';
+import { IItemsService } from '../../../domain/adapters';
+import { CreateItemDto, UpdateItemDto } from '../../common/dto';
+import { envConfig } from '../../config/environment.config';
+import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
 export class ItemService implements IItemsService {

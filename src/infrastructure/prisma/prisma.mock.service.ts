@@ -4,6 +4,6 @@ export const PrismaMockFactory = () => {
     findMany: jest.fn();
     findUnique: jest.fn();
     update: jest.fn();
-    // delete: jest.fn()
+    del: jest.fn();
   }
 };

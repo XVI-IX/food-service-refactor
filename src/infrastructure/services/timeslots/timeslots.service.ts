@@ -7,17 +7,14 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
-import moment from 'moment';
-import { ServiceInterface } from 'src/domain/adapters';
+import * as moment from 'moment';
+import { ServiceInterface } from '../../../domain/adapters';
 import {
   ITimeslotEvent,
   ITimeslotService,
-} from 'src/domain/adapters/timeslot.interface';
-import {
-  CreateTimeslotDto,
-  UpdateTimeslotDto,
-} from 'src/infrastructure/common/dto';
-import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
+} from '../../../domain/adapters/timeslot.interface';
+import { CreateTimeslotDto, UpdateTimeslotDto } from '../../common/dto';
+import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
 export class TimeslotService implements ITimeslotService {

@@ -1,17 +1,16 @@
 import {
-  BadRequestException,
   Injectable,
-  InternalServerErrorException,
+  BadRequestException,
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { ServiceInterface } from 'src/domain/adapters';
-import { IStoreService } from 'src/domain/adapters/stores.interface';
-import { IAuthUser } from 'src/infrastructure/common/decorators';
-import { CreateStoreDto } from 'src/infrastructure/common/dto';
-import { UpdateStoreDto } from 'src/infrastructure/common/dto/stores/updateStore.dto';
-import { envConfig } from 'src/infrastructure/config/environment.config';
-import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
+import { ServiceInterface } from '../../../domain/adapters';
+import { IStoreService } from '../../../domain/adapters/stores.interface';
+import { IAuthUser } from '../../common/decorators';
+import { CreateStoreDto } from '../../common/dto';
+import { UpdateStoreDto } from '../../common/dto/stores/updateStore.dto';
+import { envConfig } from '../../config/environment.config';
+import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
 export class StoreService implements IStoreService {
@@ -52,7 +51,7 @@ export class StoreService implements IStoreService {
       });
 
       if (!store) {
-        throw new InternalServerErrorException('Store could not be created');
+        throw new BadRequestException('Store could not be created');
       }
 
       if (!user.roles.includes('vendor')) {
@@ -87,7 +86,7 @@ export class StoreService implements IStoreService {
       });
 
       if (!stores) {
-        throw new InternalServerErrorException('Stores could not be retrieved');
+        throw new BadRequestException('Stores could not be retrieved');
       }
 
       return {
@@ -114,9 +113,7 @@ export class StoreService implements IStoreService {
       });
 
       if (userStores) {
-        throw new InternalServerErrorException(
-          'User stores could not be retrieved',
-        );
+        throw new BadRequestException('User stores could not be retrieved');
       }
 
       return {
@@ -163,7 +160,7 @@ export class StoreService implements IStoreService {
       });
 
       if (!updatedStore) {
-        throw new InternalServerErrorException('Store could not be updated');
+        throw new BadRequestException('Store could not be updated');
       }
 
       return {
@@ -214,7 +211,7 @@ export class StoreService implements IStoreService {
       });
 
       if (!store) {
-        throw new InternalServerErrorException('Store could not be deleted.');
+        throw new BadRequestException('Store could not be deleted.');
       }
 
       return {

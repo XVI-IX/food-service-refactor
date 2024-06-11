@@ -1,4 +1,14 @@
-import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+  Put,
+  Query,
+} from '@nestjs/common';
 import { GetAuthUser, IAuthUser } from 'src/infrastructure/common/decorators';
 import { CreateOrderDto, UpdateOrderDto } from 'src/infrastructure/common/dto';
 import { HttpResponse } from 'src/infrastructure/common/helpers/response.helper';
@@ -65,6 +75,13 @@ export class OrdersController {
       user.id,
     );
     return HttpResponse.send('Order updated.', response);
+  }
+
+  @Put('/:orderId/confirm')
+  @HttpCode(HttpStatus.OK)
+  async confirmOrder(@Param('orderId') orderId: string) {
+    const response = await this.ordersService.confirmOrder(orderId);
+    return HttpResponse.send('Order Confirmed', response);
   }
 
   @Put('/:orderId/cancel')

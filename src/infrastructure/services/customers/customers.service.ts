@@ -5,11 +5,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { ServiceInterface } from 'src/domain/adapters';
-import { ICustomerService } from 'src/domain/adapters/customer.interface';
-import { UpdateCustomerDto } from 'src/infrastructure/common/dto';
-import { envConfig } from 'src/infrastructure/config/environment.config';
-import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
+import { ServiceInterface } from '../../../domain/adapters';
+import { ICustomerService } from '../../../domain/adapters/customer.interface';
+import { UpdateCustomerDto } from '../../common/dto';
+import { envConfig } from '../../config/environment.config';
+import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
 export class CustomerService implements ICustomerService {

@@ -5,9 +5,9 @@ import {
   Logger,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { ServiceInterface } from 'src/domain/adapters';
-import { CreateTransactionDto } from 'src/infrastructure/common/dto';
-import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
+import { ServiceInterface } from '../../../domain/adapters';
+import { CreateTransactionDto } from '../../common/dto';
+import { PrismaService } from '../../prisma/prisma.service';
 import { ITransactionService } from '../../../domain/adapters';
 
 @Injectable()
