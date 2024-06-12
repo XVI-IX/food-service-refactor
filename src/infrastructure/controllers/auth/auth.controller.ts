@@ -6,15 +6,15 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { Public } from 'src/infrastructure/common/decorators';
+import { Public } from '../../common/decorators';
 import {
   CreateUserDto,
   LoginUserDto,
   ResetPasswordDto,
   VerifyEmailDto,
-} from 'src/infrastructure/common/dto';
-import { HttpResponse } from 'src/infrastructure/common/helpers/response.helper';
-import { AuthService } from 'src/infrastructure/services/auth/auth.service';
+} from '../../common/dto';
+import { HttpResponse } from '../../common/helpers/response.helper';
+import { AuthService } from '../../services/auth/auth.service';
 
 @Controller('auth')
 export class AuthController {

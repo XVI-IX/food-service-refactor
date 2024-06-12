@@ -1,4 +1,4 @@
-import { envConfig } from 'src/infrastructure/config/environment.config';
+import { envConfig } from '../../config/environment.config';
 
 interface Location {
   latitude: string;

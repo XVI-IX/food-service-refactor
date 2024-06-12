@@ -8,9 +8,9 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
-import { CreateItemDto, UpdateItemDto } from 'src/infrastructure/common/dto';
-import { HttpResponse } from 'src/infrastructure/common/helpers/response.helper';
-import { ItemService } from 'src/infrastructure/services/items/items.service';
+import { CreateItemDto, UpdateItemDto } from '../../common/dto';
+import { HttpResponse } from '../../common/helpers/response.helper';
+import { ItemService } from '../../services/items/items.service';
 
 @Controller('items')
 export class ItemsController {

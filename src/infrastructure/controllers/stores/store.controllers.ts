@@ -10,10 +10,10 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
-import { GetAuthUser, IAuthUser } from 'src/infrastructure/common/decorators';
-import { CreateStoreDto, UpdateStoreDto } from 'src/infrastructure/common/dto';
-import { HttpResponse } from 'src/infrastructure/common/helpers/response.helper';
-import { StoreService } from 'src/infrastructure/services/stores/stores.service';
+import { GetAuthUser, IAuthUser } from '../../common/decorators';
+import { CreateStoreDto, UpdateStoreDto } from '../../common/dto';
+import { HttpResponse } from '../../common/helpers/response.helper';
+import { StoreService } from '../../services/stores/stores.service';
 
 @Controller('stores')
 export class StoreController {

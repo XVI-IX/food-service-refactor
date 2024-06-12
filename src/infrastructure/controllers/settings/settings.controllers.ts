@@ -8,9 +8,9 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
-import { UpdateUserSettingsDto } from 'src/infrastructure/common/dto';
-import { HttpResponse } from 'src/infrastructure/common/helpers/response.helper';
-import { SettingsService } from 'src/infrastructure/services/settings/settings.service';
+import { UpdateUserSettingsDto } from '../../common/dto';
+import { HttpResponse } from '../../common/helpers/response.helper';
+import { SettingsService } from '../../services/settings/settings.service';
 
 @Controller('settings')
 export class SettingsController {

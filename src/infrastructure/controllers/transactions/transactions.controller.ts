@@ -7,9 +7,9 @@ import {
   Param,
   Post,
 } from '@nestjs/common';
-import { CreateTransactionDto } from 'src/infrastructure/common/dto';
-import { HttpResponse } from 'src/infrastructure/common/helpers/response.helper';
-import { TransactionsService } from 'src/infrastructure/services/transactions/transactions.service';
+import { CreateTransactionDto } from '../../common/dto';
+import { HttpResponse } from '../../common/helpers/response.helper';
+import { TransactionsService } from '../../services/transactions/transactions.service';
 
 @Controller('transactions')
 export class TransactionsController {

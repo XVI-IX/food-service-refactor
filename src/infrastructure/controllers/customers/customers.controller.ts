@@ -7,9 +7,9 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
-import { UpdateCustomerDto } from 'src/infrastructure/common/dto';
-import { HttpResponse } from 'src/infrastructure/common/helpers/response.helper';
-import { CustomerService } from 'src/infrastructure/services/customers/customers.service';
+import { UpdateCustomerDto } from '../../common/dto';
+import { HttpResponse } from '../../common/helpers/response.helper';
+import { CustomerService } from '../../services/customers/customers.service';
 
 @Controller('customers')
 export class CustomerController {

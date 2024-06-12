@@ -9,12 +9,9 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
-import {
-  CreateTimeslotDto,
-  UpdateTimeslotDto,
-} from 'src/infrastructure/common/dto';
-import { HttpResponse } from 'src/infrastructure/common/helpers/response.helper';
-import { TimeslotService } from 'src/infrastructure/services/timeslots/timeslots.service';
+import { CreateTimeslotDto, UpdateTimeslotDto } from '../../common/dto';
+import { HttpResponse } from '../../common/helpers/response.helper';
+import { TimeslotService } from '../../services/timeslots/timeslots.service';
 
 @Controller('timeslots')
 export class TimeslotController {

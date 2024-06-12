@@ -9,9 +9,9 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
-import { CreateNotificationDto } from 'src/infrastructure/common/dto';
-import { HttpResponse } from 'src/infrastructure/common/helpers/response.helper';
-import { NotificationService } from 'src/infrastructure/services/notifications/notification.service';
+import { CreateNotificationDto } from '../../common/dto';
+import { HttpResponse } from '../../common/helpers/response.helper';
+import { NotificationService } from '../../services/notifications/notification.service';
 
 @Controller('notifications')
 export class NotificationController {

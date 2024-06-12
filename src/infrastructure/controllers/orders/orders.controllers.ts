@@ -9,10 +9,10 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
-import { GetAuthUser, IAuthUser } from 'src/infrastructure/common/decorators';
-import { CreateOrderDto, UpdateOrderDto } from 'src/infrastructure/common/dto';
-import { HttpResponse } from 'src/infrastructure/common/helpers/response.helper';
-import { OrderService } from 'src/infrastructure/services/orders/orders.service';
+import { GetAuthUser, IAuthUser } from '../../common/decorators';
+import { CreateOrderDto, UpdateOrderDto } from '../../common/dto';
+import { HttpResponse } from '../../common/helpers/response.helper';
+import { OrderService } from '../../services/orders/orders.service';
 
 @Controller('orders')
 export class OrdersController {
