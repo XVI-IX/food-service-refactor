@@ -19,16 +19,16 @@ describe('AuthService', () => {
       imports: [PrismaModule, EventEmitterModule.forRoot(), JwtModule],
       providers: [
         AuthService,
-        {
-          provide: PrismaService,
-          useFactory: PrismaMockFactory,
-        },
-        {
-          provide: EventEmitter2,
-          useValue: {
-            emit: jest.fn(),
-          },
-        },
+        // {
+        //   provide: PrismaService,
+        //   useFactory: PrismaMockFactory,
+        // },
+        // {
+        //   provide: EventEmitter2,
+        //   useValue: {
+        //     emit: jest.fn(),
+        //   },
+        // },
         // {
         //   provide: JwtService,
         //   useValue: {
@@ -48,34 +48,36 @@ describe('AuthService', () => {
     jest.clearAllMocks();
   });
 
+  describe('register', () => {
+    it('should register', async () => {
+      const dto: CreateUserDto = {
+        email: 'test@example.com',
+        password: 'testPassword',
+        role: 'customer',
+        userName: 'testUser',
+        firstName: 'test first name',
+        phone: '0000000000',
+        otherName: 'test other name',
+        businessAddress: 'test business address',
+        google_id: 'test google id',
+      };
+  
+      prisma.users.findUnique = jest.fn().mockResolvedValue(null);
+      prisma.users.create = jest.fn().mockResolvedValue({
+        ...dto,
+        id: 'user-id',
+        password: await argon.hash(dto.password),
+        verificationToken: 'verificationToken',
+      });
+  
+      const user = await service.register(dto);
+      expect(user).toBeDefined();
+      expect(user.data.email).toBe(dto.email);
+    });
+  })
+
   it('service should be defined', async () => {
     expect(service).toBeDefined();
-  });
-
-  it('should register', async () => {
-    const dto: CreateUserDto = {
-      email: 'test@example.com',
-      password: 'testPassword',
-      role: 'customer',
-      userName: 'testUser',
-      firstName: 'test first name',
-      phone: '0000000000',
-      otherName: 'test other name',
-      businessAddress: 'test business address',
-      google_id: 'test google id',
-    };
-
-    prisma.users.findUnique = jest.fn().mockResolvedValue(null);
-    prisma.users.create = jest.fn().mockResolvedValue({
-      ...dto,
-      id: 'user-id',
-      password: await argon.hash(dto.password),
-      verificationToken: 'verificationToken',
-    });
-
-    const user = await service.register(dto);
-    expect(user).toBeDefined();
-    expect(user.data.email).toBe(dto.email);
   });
 
   it('should throw BadRequestException if email already exists', async () => {
@@ -95,4 +97,6 @@ describe('AuthService', () => {
 
     await expect(service.register(dto)).rejects.toThrow(BadRequestException);
   });
+
+
 });
