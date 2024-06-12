@@ -43,6 +43,10 @@ export class AuthService {
         },
       });
 
+      // if (!user) {
+      //   throw new NotFoundException('User not found')
+      // }
+
       return user;
     } catch (error) {
       this.logger.error(error);
@@ -52,7 +56,11 @@ export class AuthService {
 
   async register(dto: CreateUserDto): Promise<ServiceInterface<users>> {
     try {
-      const checkExists = await this.checkUser(dto.email);
+      const checkExists = await this.prisma.users.findUnique({
+        where: {
+          email: dto.email,
+        },
+      });
 
       if (checkExists) {
         throw new BadRequestException('Email already in use.');
