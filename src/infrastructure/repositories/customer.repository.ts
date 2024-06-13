@@ -1,4 +1,4 @@
-import { Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Logger, NotFoundException } from '@nestjs/common';
 import { ICustomerRepository } from '../../domain/repositories/customer-repository.interface';
 import { PrismaService } from '../prisma/prisma.service';
 import { envConfig } from '../config/environment.config';
@@ -32,10 +32,12 @@ export class CustomerRepository implements ICustomerRepository {
         },
       });
 
+      // console.log(customers)
+
       return customers;
     } catch (error) {
-      this.logger.error(error);
-      throw error;
+      this.logger.error('Error retrieving all customers', error);
+      throw new BadRequestException('all customers could not be retrieved');
     }
   }
 
