@@ -61,7 +61,7 @@ describe('AuthService', () => {
         businessAddress: 'test business address',
         google_id: 'test google id',
       };
-  
+
       prisma.users.findUnique = jest.fn().mockResolvedValue(null);
       prisma.users.create = jest.fn().mockResolvedValue({
         ...dto,
@@ -69,12 +69,12 @@ describe('AuthService', () => {
         password: await argon.hash(dto.password),
         verificationToken: 'verificationToken',
       });
-  
+
       const user = await service.register(dto);
       expect(user).toBeDefined();
       expect(user.data.email).toBe(dto.email);
     });
-  })
+  });
 
   it('service should be defined', async () => {
     expect(service).toBeDefined();
@@ -97,6 +97,4 @@ describe('AuthService', () => {
 
     await expect(service.register(dto)).rejects.toThrow(BadRequestException);
   });
-
-
 });

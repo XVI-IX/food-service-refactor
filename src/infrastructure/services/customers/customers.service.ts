@@ -140,6 +140,7 @@ export class CustomerService implements ICustomerService {
           phone: dto.phone,
         },
         select: {
+          id: true,
           firstName: true,
           lastName: true,
           otherName: true,
