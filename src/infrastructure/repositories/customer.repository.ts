@@ -1,13 +1,21 @@
-import { BadRequestException, Logger, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { ICustomerRepository } from '../../domain/repositories/customer-repository.interface';
 import { PrismaService } from '../prisma/prisma.service';
 import { envConfig } from '../config/environment.config';
 import { UserModel } from 'src/domain/models/user.model';
 import { UpdateCustomerDto } from '../common/dto';
 
+@Injectable()
 export class CustomerRepository implements ICustomerRepository {
   private logger: Logger;
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {
+    this.logger = new Logger(CustomerRepository.name);
+  }
 
   async getAllCustomers(page: number = 1): Promise<UserModel[]> {
     try {
@@ -36,7 +44,7 @@ export class CustomerRepository implements ICustomerRepository {
 
       return customers;
     } catch (error) {
-      this.logger.error('Error retrieving all customers', error);
+      this.logger.error('Error retrieving all customers', error.stack);
       throw new BadRequestException('all customers could not be retrieved');
     }
   }
