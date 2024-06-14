@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { IOrderRepository } from 'src/domain/repositories/order-repository.interface';
 import { PrismaService } from '../prisma/prisma.service';
 import { OrderModel } from 'src/domain/models/order.model';
@@ -7,6 +12,7 @@ import { OrderHistoryModel } from 'src/domain/models/orderHistory.model';
 import { OrderEventTypeEnum } from '@prisma/client';
 import { ItemModel } from 'src/domain/models/item.model';
 import { OrderItemModel } from 'src/domain/models/orderItem.model';
+import { envConfig } from '../config/environment.config';
 
 @Injectable()
 export class OrderRepository implements IOrderRepository {
@@ -205,17 +211,107 @@ export class OrderRepository implements IOrderRepository {
       throw error;
     }
   }
-  getAllOrders(page?: number): Promise<OrderModel[]> {
-    throw new Error('Method not implemented.');
+
+  async getAllOrders(page?: number): Promise<OrderModel[]> {
+    try {
+      const orders = await this.prisma.orders.findMany({
+        skip: (page - 1) * envConfig.getPaginationLimit(),
+        take: envConfig.getPaginationLimit(),
+      });
+
+      if (!orders) {
+        throw new BadRequestException('Orders could not be retrieved');
+      }
+
+      return orders;
+    } catch (error) {
+      this.logger.error('Orders could not be rtrieved', error.stack);
+    }
   }
-  getAllUserOrders(userId: string, page?: number): Promise<OrderModel[]> {
-    throw new Error('Method not implemented.');
+
+  async getAllUserOrders(userId: string, page?: number): Promise<OrderModel[]> {
+    try {
+      const userOrders = await this.prisma.orders.findMany({
+        where: {
+          userId: userId,
+        },
+        take: envConfig.getPaginationLimit(),
+        skip: (page - 1) * envConfig.getPaginationLimit(),
+      });
+
+      if (!userOrders) {
+        throw new BadRequestException('User orders could not be retrieved');
+      }
+    } catch (error) {
+      this.logger.error('User orders could not be retrieved', error.stack);
+      throw error;
+    }
   }
-  getAllStoreOrders(storeId: string, page?: number): Promise<OrderModel[]> {
-    throw new Error('Method not implemented.');
+
+  async getAllStoreOrders(
+    storeId: string,
+    page?: number,
+  ): Promise<OrderModel[]> {
+    try {
+      const storeOrders = await this.prisma.orders.findMany({
+        where: {
+          storeId: storeId,
+        },
+        skip: (page - 1) * envConfig.getPaginationLimit(),
+        take: envConfig.getPaginationLimit(),
+      });
+
+      if (!storeOrders) {
+        throw new InternalServerErrorException(
+          'Store orders could not be retrieved',
+        );
+      }
+
+      return storeOrders;
+    } catch (error) {
+      this.logger.error('Store orders could not be retrieved');
+      throw error;
+    }
   }
   getOrderById(orderId: string): Promise<OrderModel> {
-    throw new Error('Method not implemented.');
+    try {
+      const order = await this.prisma.orders.findUnique({
+        where: {
+          id: orderId,
+        },
+        select: {
+          id: true,
+          userId: true,
+          storeId: true,
+          deliveryLocation: true,
+          deliveryStatus: true,
+          orderReference: true,
+          deliveryInstructions: true,
+          subTotalPrice: true,
+          paymentMethod: true,
+          estimatedDeliveryTime: true,
+          promoCode: true,
+          taxAmount: true,
+          deliveryFee: true,
+          orderHistory: true,
+          orderItems: true,
+          transactions: true,
+          feedback: true,
+          rating: true,
+          cancellationReason: true,
+          timeslotId: true,
+        },
+      });
+
+      if (!order) {
+        throw new NotFoundException('Order not found');
+      }
+
+      return order;
+    } catch (error) {
+      this.logger.error('Order could not be retrieved', error.stack);
+      throw error;
+    }
   }
   updateOrder(
     orderId: string,

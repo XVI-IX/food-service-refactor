@@ -74,14 +74,7 @@ export class OrderService implements IOrderService {
 
   async getAllOrders(page: number = 1): Promise<ServiceInterface> {
     try {
-      const orders = await this.prisma.orders.findMany({
-        skip: (page - 1) * envConfig.getPaginationLimit(),
-        take: envConfig.getPaginationLimit(),
-      });
-
-      if (!orders) {
-        throw new InternalServerErrorException('Orders could not be retrieved');
-      }
+      const orders = await this.ordersRepository.getAllOrders(page);
 
       return {
         data: orders,
@@ -98,19 +91,10 @@ export class OrderService implements IOrderService {
     page: number = 1,
   ): Promise<ServiceInterface> {
     try {
-      const userOrders = await this.prisma.orders.findMany({
-        where: {
-          userId: userId,
-        },
-        take: envConfig.getPaginationLimit(),
-        skip: (page - 1) * envConfig.getPaginationLimit(),
-      });
-
-      if (!userOrders) {
-        throw new InternalServerErrorException(
-          'User orders could not be retrieved',
-        );
-      }
+      const userOrders = await this.ordersRepository.getAllUserOrders(
+        userId,
+        page,
+      );
 
       return {
         data: userOrders,
@@ -127,19 +111,10 @@ export class OrderService implements IOrderService {
     page: number = 1,
   ): Promise<ServiceInterface> {
     try {
-      const storeOrders = await this.prisma.orders.findMany({
-        where: {
-          storeId: storeId,
-        },
-        skip: (page - 1) * envConfig.getPaginationLimit(),
-        take: envConfig.getPaginationLimit(),
-      });
-
-      if (!storeOrders) {
-        throw new InternalServerErrorException(
-          'Store orders could not be retrieved',
-        );
-      }
+      const storeOrders = await this.ordersRepository.getAllStoreOrders(
+        storeId,
+        page,
+      );
 
       return {
         data: storeOrders,
@@ -186,37 +161,7 @@ export class OrderService implements IOrderService {
 
   async getOrderById(orderId: string): Promise<ServiceInterface> {
     try {
-      const order = await this.prisma.orders.findUnique({
-        where: {
-          id: orderId,
-        },
-        select: {
-          id: true,
-          userId: true,
-          storeId: true,
-          deliveryLocation: true,
-          deliveryStatus: true,
-          orderReference: true,
-          deliveryInstructions: true,
-          subTotalPrice: true,
-          paymentMethod: true,
-          estimatedDeliveryTime: true,
-          promoCode: true,
-          taxAmount: true,
-          deliveryFee: true,
-          orderHistory: true,
-          orderItems: true,
-          transactions: true,
-          feedback: true,
-          rating: true,
-          cancellationReason: true,
-          timeslotId: true,
-        },
-      });
-
-      if (!order) {
-        throw new NotFoundException('Order not found');
-      }
+      const order = await this.ordersRepository.getOrderById(orderId);
 
       return {
         data: order,
