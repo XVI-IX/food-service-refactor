@@ -1,4 +1,9 @@
-import { BadRequestException, Logger, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   ICreateUserData,
   IResetPasswordData,
@@ -10,6 +15,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { randomBytes } from 'node:crypto';
 import { envConfig } from '../config/environment.config';
 
+@Injectable()
 export class UserRepository implements IUserRepository {
   private logger: Logger;
 
