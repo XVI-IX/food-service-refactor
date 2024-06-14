@@ -15,6 +15,7 @@ import {
 import { CreateOrderDto, UpdateOrderDto } from '../../common/dto';
 import { envConfig } from '../../config/environment.config';
 import { PrismaService } from '../../prisma/prisma.service';
+import { OrderRepository } from '../../repositories/orders.repository';
 
 @Injectable()
 export class OrderService implements IOrderService {
@@ -22,6 +23,7 @@ export class OrderService implements IOrderService {
 
   constructor(
     private readonly prisma: PrismaService,
+    private readonly ordersRepository: OrderRepository,
     private readonly eventEmitter: EventEmitter2,
   ) {
     this.logger = new Logger(OrderService.name);
@@ -42,141 +44,27 @@ export class OrderService implements IOrderService {
         throw new NotFoundException('Store with id not found');
       }
 
-      const order = await this.prisma.orders.create({
-        data: {
-          user: {
-            connect: {
-              id: userId,
-            },
-          },
-          store: {
-            connect: {
-              id: dto.storeId,
-            },
-          },
-          deliveryLocation: dto.deliveryLocation,
-          deliveryInstructions: dto.deliveryInstructions,
-          subTotalPrice: dto.subTotalPrice,
-          paymentMethod: dto.paymentMethod,
-        },
-      });
+      const order = await this.ordersRepository.createOrder(userId, dto);
 
-      if (!order) {
-        throw new BadRequestException('Order could not be placed');
-      }
-
-      const addOrderHistory = await this.prisma.orderHistory.create({
-        data: {
-          order: {
-            connect: {
-              id: order.id,
-            },
-          },
-          eventType: 'placement',
-          actor: {
-            connect: {
-              id: userId,
-            },
-          },
-        },
-      });
+      const addOrderHistory = await this.ordersRepository.addOrderHistory(
+        order.id,
+        'placement',
+        userId,
+      );
 
       if (!addOrderHistory) {
-        await this.prisma.orders.delete({
-          where: {
-            id: order.id,
-          },
-        });
+        await this.ordersRepository.failedOrder(order.id);
         throw new BadRequestException('Order history could not be recorded');
       }
 
-      const addOrderItems = dto.orderItems.map(async (orderItem) => {
-        try {
-          const findItem = await this.prisma.items.findUnique({
-            where: {
-              id: orderItem.id,
-              storeId: dto.storeId,
-            },
-          });
-
-          if (!findItem) {
-            throw new BadRequestException('Item could not be found in Store');
-          }
-
-          const item = await this.prisma.orderItems.create({
-            data: {
-              order: {
-                connect: {
-                  id: order.id,
-                },
-              },
-              item: {
-                connect: {
-                  id: findItem.id,
-                },
-              },
-              price: findItem.price,
-              quantity: orderItem.quantity,
-            },
-          });
-
-          if (!item) {
-            await this.prisma.orders.update({
-              where: {
-                id: order.id,
-              },
-              data: {
-                deliveryStatus: 'failed',
-              },
-            });
-            throw new BadRequestException('Order item could not be added');
-          }
-        } catch (error) {
-          this.logger.error(error);
-          throw error;
-        }
-      });
-
-      await Promise.all(addOrderItems);
-
-      if (!addOrderItems) {
-        throw new BadRequestException('Order items could not be added');
-      }
-
-      const ordersFinal = await this.prisma.orders.findUnique({
-        where: {
-          id: order.id,
-        },
-        select: {
-          id: true,
-          userId: true,
-          storeId: true,
-          deliveryLocation: true,
-          deliveryStatus: true,
-          orderReference: true,
-          deliveryInstructions: true,
-          subTotalPrice: true,
-          paymentMethod: true,
-          estimatedDeliveryTime: true,
-          promoCode: true,
-          taxAmount: true,
-          deliveryFee: true,
-          orderHistory: true,
-          orderItems: true,
-          transactions: true,
-          feedback: true,
-          rating: true,
-          cancellationReason: true,
-          timeslotId: true,
-        },
-      });
-
-      if (!ordersFinal) {
-        throw new BadRequestException('Order could not be retrieved');
-      }
+      const orderItems = this.ordersRepository.addOrderItems(
+        dto.storeId,
+        dto.orderItems,
+        order.id,
+      );
 
       return {
-        data: ordersFinal,
+        data: orderItems,
       };
     } catch (error) {
       this.logger.error(error);
