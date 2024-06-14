@@ -32,7 +32,7 @@ export class AuthController {
   @Public()
   async authenticate(@Body() dto: LoginUserDto) {
     const response = await this.authService.authenticate(dto);
-    return HttpResponse.send('User authenticated', response);
+    return HttpResponse.send(response.message, response);
   }
 
   @Post('forgot-password')

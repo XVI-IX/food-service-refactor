@@ -96,6 +96,7 @@ export class CustomerRepository implements ICustomerRepository {
           lastName: true,
           otherName: true,
           phone: true,
+          email: true,
           createdAt: true,
           updatedAt: true,
         },
