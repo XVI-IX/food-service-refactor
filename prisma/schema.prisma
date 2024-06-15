@@ -276,4 +276,7 @@ model reviews {
 
   item   items?  @relation(fields: [itemId], references: [id], onDelete: Cascade)
   itemId String? @db.Uuid
+
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt
 }

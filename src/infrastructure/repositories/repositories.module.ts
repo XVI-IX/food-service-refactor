@@ -6,6 +6,7 @@ import { UserRepository } from './user.repository';
 import { ItemsRepository } from './items.repository';
 import { OrderRepository } from './orders.repository';
 import { NotificationRepository } from './notification.repository';
+import { ReviewRepository } from './review.repository';
 
 @Module({
   imports: [PrismaModule],
@@ -16,6 +17,7 @@ import { NotificationRepository } from './notification.repository';
     ItemsRepository,
     OrderRepository,
     NotificationRepository,
+    ReviewRepository,
   ],
   exports: [
     CustomerRepository,
@@ -23,6 +25,7 @@ import { NotificationRepository } from './notification.repository';
     ItemsRepository,
     OrderRepository,
     NotificationRepository,
+    ReviewRepository,
   ],
 })
 export class RepositoriesModule {}
