@@ -20,6 +20,26 @@ export class OrderRepository implements IOrderRepository {
     this.logger = new Logger(OrderRepository.name);
   }
 
+  async getConfirmedOrder(orderId: string): Promise<OrderModel> {
+    try {
+      const confirmedOrder = await this.prisma.orders.findUnique({
+        where: {
+          id: orderId,
+          deliveryStatus: 'confirmed',
+        },
+      });
+
+      if (!confirmedOrder) {
+        throw new BadRequestException('Confirmed order could not be retrieved');
+      }
+
+      return confirmedOrder;
+    } catch (error) {
+      this.logger.error('Confirmed order could not be retrieved', error.stack);
+      throw error;
+    }
+  }
+
   async createOrder(userId: string, dto: CreateOrderDto): Promise<OrderModel> {
     try {
       const storeExists = await this.prisma.stores.findUnique({
@@ -334,7 +354,11 @@ export class OrderRepository implements IOrderRepository {
           paymentMethod: dto.paymentMethod,
           promoCode: dto.promoCode,
           deliveryFee: dto.deliveryFee,
-          timeslotId: dto.timeslotId,
+          timeslot: {
+            connect: {
+              id: dto.timeslotId,
+            },
+          },
         },
       });
 

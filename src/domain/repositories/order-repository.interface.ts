@@ -29,4 +29,5 @@ export interface IOrderRepository {
     orderId: string,
   ): Promise<OrderModel>;
   getOrderItems(orderId: string): Promise<OrderItemModel[]>;
+  getConfirmedOrder(orderId: string): Promise<OrderModel>;
 }
