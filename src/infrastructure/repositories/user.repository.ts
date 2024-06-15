@@ -23,6 +23,28 @@ export class UserRepository implements IUserRepository {
     this.logger = new Logger(UserRepository.name);
   }
 
+  async changeUserRole(userId: string, role: any): Promise<UserModel> {
+    try {
+      const user = await this.prisma.users.update({
+        where: {
+          id: userId,
+        },
+        data: {
+          role: role,
+        },
+      });
+
+      if (!user) {
+        throw new BadRequestException('User role could not be updated');
+      }
+
+      return user;
+    } catch (error) {
+      this.logger.error('User role could not be updated', error.stack);
+      throw error;
+    }
+  }
+
   async getUserByEmail(email: string): Promise<UserModel> {
     try {
       const user = await this.prisma.users.findUnique({

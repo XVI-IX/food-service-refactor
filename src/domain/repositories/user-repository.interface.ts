@@ -36,4 +36,5 @@ export interface IUserRepository {
   updateUserPassword(dto: IResetPasswordData): Promise<UserModel | null>;
   revokeToken(token: string): Promise<any>;
   checkRevokedToken(token: string): Promise<any>;
+  changeUserRole(userId: string, role: string): Promise<UserModel>;
 }
