@@ -9,6 +9,7 @@ import { NotificationRepository } from './notification.repository';
 import { ReviewRepository } from './review.repository';
 import { SettingsRepository } from './settings.repository';
 import { StoreRepository } from './store.repository';
+import { TimeslotRepository } from './timeslot.repository';
 
 @Module({
   imports: [PrismaModule],
@@ -22,6 +23,7 @@ import { StoreRepository } from './store.repository';
     ReviewRepository,
     SettingsRepository,
     StoreRepository,
+    TimeslotRepository
   ],
   exports: [
     CustomerRepository,
@@ -32,6 +34,7 @@ import { StoreRepository } from './store.repository';
     ReviewRepository,
     SettingsRepository,
     StoreRepository,
+    TimeslotRepository
   ],
 })
 export class RepositoriesModule {}
