@@ -2,8 +2,10 @@ import { BaseModel } from './base.model';
 import { OrderHistoryModel } from './orderHistory.model';
 import { OrderItemModel } from './orderItem.model';
 import { PaymentModel } from './payment.model';
+import { UserModel } from './user.model';
 
 export class OrderModel extends BaseModel {
+  user?: UserModel;
   userId?: string;
   storeId?: string;
   deliveryLocation?: string;

@@ -2,7 +2,6 @@ import { CreateOrderDto, UpdateOrderDto } from 'src/infrastructure/common/dto';
 import { OrderModel } from '../models/order.model';
 import { OrderHistoryModel } from '../models/orderHistory.model';
 import { OrderEventTypeEnum } from '@prisma/client';
-import { ItemModel } from '../models/item.model';
 import { OrderItemModel } from '../models/orderItem.model';
 
 export interface IOrderRepository {
@@ -29,4 +28,5 @@ export interface IOrderRepository {
     items: OrderItemModel[],
     orderId: string,
   ): Promise<OrderModel>;
+  getOrderItems(orderId: string): Promise<OrderItemModel[]>;
 }

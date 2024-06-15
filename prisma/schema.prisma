@@ -44,6 +44,7 @@ enum OrderEventTypeEnum {
   status_change
   modification
   cancellation
+  confirmation
 }
 
 enum PaymentStatusEnum {
@@ -176,8 +177,8 @@ model orders {
   orderItems            orderItems[]
   transactions          transactions[]
 
-  createdAt             DateTime        @default(now()) @db.Timestamptz(6)
-  updatedAt            DateTime        @default(now()) @updatedAt
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt
 }
 
 model orderHistory {

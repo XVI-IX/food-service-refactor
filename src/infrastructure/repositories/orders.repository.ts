@@ -10,7 +10,6 @@ import { OrderModel } from 'src/domain/models/order.model';
 import { CreateOrderDto, UpdateOrderDto } from '../common/dto';
 import { OrderHistoryModel } from 'src/domain/models/orderHistory.model';
 import { OrderEventTypeEnum } from '@prisma/client';
-import { ItemModel } from 'src/domain/models/item.model';
 import { OrderItemModel } from 'src/domain/models/orderItem.model';
 import { envConfig } from '../config/environment.config';
 
@@ -23,6 +22,16 @@ export class OrderRepository implements IOrderRepository {
 
   async createOrder(userId: string, dto: CreateOrderDto): Promise<OrderModel> {
     try {
+      const storeExists = await this.prisma.stores.findUnique({
+        where: {
+          id: dto.storeId,
+        },
+      });
+
+      if (!storeExists) {
+        throw new NotFoundException('Store with id not found');
+      }
+
       const order = await this.prisma.orders.create({
         data: {
           user: {
@@ -101,11 +110,7 @@ export class OrderRepository implements IOrderRepository {
         throw new BadRequestException('Failed order could not be recorded');
       }
 
-      const addOrderHistory = await this.addOrderHistory(
-        orderId,
-        'cancellation',
-        failedOrder.userId,
-      );
+      await this.addOrderHistory(orderId, 'cancellation', failedOrder.userId);
 
       return failedOrder;
     } catch (error) {
@@ -242,6 +247,8 @@ export class OrderRepository implements IOrderRepository {
       if (!userOrders) {
         throw new BadRequestException('User orders could not be retrieved');
       }
+
+      return userOrders;
     } catch (error) {
       this.logger.error('User orders could not be retrieved', error.stack);
       throw error;
@@ -262,9 +269,7 @@ export class OrderRepository implements IOrderRepository {
       });
 
       if (!storeOrders) {
-        throw new InternalServerErrorException(
-          'Store orders could not be retrieved',
-        );
+        throw new BadRequestException('Store orders could not be retrieved');
       }
 
       return storeOrders;
@@ -273,7 +278,8 @@ export class OrderRepository implements IOrderRepository {
       throw error;
     }
   }
-  getOrderById(orderId: string): Promise<OrderModel> {
+
+  async getOrderById(orderId: string): Promise<OrderModel> {
     try {
       const order = await this.prisma.orders.findUnique({
         where: {
@@ -313,17 +319,109 @@ export class OrderRepository implements IOrderRepository {
       throw error;
     }
   }
-  updateOrder(
-    orderId: string,
-    dto: UpdateOrderDto,
-    userId: string,
-  ): Promise<OrderModel> {
-    throw new Error('Method not implemented.');
+
+  async updateOrder(orderId: string, dto: UpdateOrderDto): Promise<OrderModel> {
+    try {
+      const updateOrder = await this.prisma.orders.update({
+        where: {
+          id: orderId,
+        },
+        data: {
+          deliveryLocation: dto.deliveryLocation,
+          deliveryStatus: dto.deliveryStatus,
+          deliveryInstructions: dto.deliveryInstructions,
+          subTotalPrice: dto.subTotalPrice,
+          paymentMethod: dto.paymentMethod,
+          promoCode: dto.promoCode,
+          deliveryFee: dto.deliveryFee,
+          timeslotId: dto.timeslotId,
+        },
+      });
+
+      if (!updateOrder) {
+        throw new BadRequestException('Order could not be updated');
+      }
+
+      return updateOrder;
+    } catch (error) {
+      this.logger.error('Order could not be updated', error.stack);
+      throw error;
+    }
   }
-  confirmOrder(orderId: string): Promise<OrderModel> {
-    throw new Error('Method not implemented.');
+
+  async confirmOrder(orderId: string): Promise<OrderModel> {
+    try {
+      const order = await this.prisma.orders.update({
+        where: {
+          id: orderId,
+        },
+        data: {
+          deliveryStatus: 'confirmed',
+        },
+        select: {
+          user: true,
+          id: true,
+        },
+      });
+
+      if (!order) {
+        throw new BadRequestException('Order could not be confirmed');
+      }
+
+      return order;
+    } catch (error) {
+      this.logger.error('Order could not be confirmed', error.stack);
+      throw error;
+    }
   }
-  cancelOrder(orderId: string): Promise<OrderModel> {
-    throw new Error('Method not implemented.');
+
+  async cancelOrder(orderId: string): Promise<OrderModel> {
+    try {
+      const cancelledOrder = await this.prisma.orders.update({
+        where: {
+          id: orderId,
+        },
+        data: {
+          deliveryStatus: 'cancelled',
+        },
+      });
+
+      if (!cancelledOrder) {
+        throw new BadRequestException('Order could not be cancelled');
+      }
+
+      return cancelledOrder;
+    } catch (error) {
+      this.logger.error('Order could not be cancelled', error.stack);
+      throw error;
+    }
+  }
+
+  async getOrderItems(orderId: string): Promise<OrderItemModel[]> {
+    try {
+      const orderItems = await this.prisma.orderItems.findMany({
+        where: {
+          orderId: orderId,
+        },
+        select: {
+          id: true,
+          item: true,
+          orderId: true,
+          itemId: true,
+          quantity: true,
+          totalItemPrice: true,
+          price: true,
+        },
+      });
+
+      if (!orderItems) {
+        throw new BadRequestException('Order items could not be retrieved');
+      }
+
+      return orderItems;
+    } catch (error) {
+      this.logger.error('Order items could be retrieved', error.stack);
+      throw error;
+    }
   }
 }
