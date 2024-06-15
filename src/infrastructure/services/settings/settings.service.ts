@@ -1,14 +1,10 @@
-import {
-  BadRequestException,
-  Injectable,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { ServiceInterface } from '../../../domain/adapters';
 import { ISettingsService } from '../../../domain/adapters/settings.interface';
 import { UpdateUserSettingsDto } from '../../common/dto';
 import { PrismaService } from '../../prisma/prisma.service';
+import { SettingsRepository } from 'src/infrastructure/repositories/settings.repository';
 
 @Injectable()
 export class SettingsService implements ISettingsService {
@@ -17,17 +13,14 @@ export class SettingsService implements ISettingsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly eventEmitter: EventEmitter2,
+    private readonly settingsRepository: SettingsRepository,
   ) {
     this.logger = new Logger(SettingsService.name);
   }
 
   async getAllUserSettings(): Promise<ServiceInterface<any>> {
     try {
-      const settings = await this.prisma.userSettings.findMany();
-
-      if (!settings) {
-        throw new BadRequestException('Users settings could not be retrieved');
-      }
+      const settings = await this.settingsRepository.getAllUserSettings();
 
       return {
         data: settings,
@@ -40,15 +33,8 @@ export class SettingsService implements ISettingsService {
 
   async getUserSettingsById(userId: string): Promise<ServiceInterface<any>> {
     try {
-      const settings = await this.prisma.userSettings.findUnique({
-        where: {
-          userId: userId,
-        },
-      });
-
-      if (!settings) {
-        throw new BadRequestException('User settings could not be retrieved');
-      }
+      const settings =
+        await this.settingsRepository.getUserSettingsById(userId);
 
       return {
         data: settings,
@@ -64,32 +50,10 @@ export class SettingsService implements ISettingsService {
     dto: UpdateUserSettingsDto,
   ): Promise<ServiceInterface> {
     try {
-      const userExists = await this.prisma.users.findUnique({
-        where: {
-          id: userId,
-        },
-      });
-
-      if (!userExists) {
-        throw new NotFoundException('User with id not found');
-      }
-
-      const updateSettings = await this.prisma.userSettings.update({
-        where: {
-          userId: userId,
-        },
-        data: {
-          recieveEmailUpdates: dto.recieveEmailUpdates,
-          recieveSMSUpdates: dto.recieveSMSUpdates,
-          languagePreference: dto.languagePreference,
-          darkmode: dto.darkmode,
-          timezone: dto.timezone,
-        },
-      });
-
-      if (!updateSettings) {
-        throw new BadRequestException('User settings could not be updated');
-      }
+      const updateSettings = await this.settingsRepository.updateUserSettings(
+        userId,
+        dto,
+      );
 
       return {
         data: updateSettings,
@@ -102,19 +66,7 @@ export class SettingsService implements ISettingsService {
 
   async createUserSettings(userId: string): Promise<ServiceInterface> {
     try {
-      const settings = await this.prisma.userSettings.create({
-        data: {
-          user: {
-            connect: {
-              id: userId,
-            },
-          },
-        },
-      });
-
-      if (!settings) {
-        throw new BadRequestException('User settings could not be created');
-      }
+      const settings = await this.settingsRepository.createUserSettings(userId);
 
       return {
         data: settings,
@@ -124,22 +76,8 @@ export class SettingsService implements ISettingsService {
 
   async resetUserSettings(userId: string): Promise<ServiceInterface<any>> {
     try {
-      const userSettings = await this.prisma.userSettings.update({
-        where: {
-          userId: userId,
-        },
-        data: {
-          recieveEmailUpdates: true,
-          recieveSMSUpdates: true,
-          darkmode: false,
-          languagePreference: 'en',
-          timezone: 'UTC',
-        },
-      });
-
-      if (!userSettings) {
-        throw new BadRequestException('User settings could not be reset');
-      }
+      const userSettings =
+        await this.settingsRepository.resetUserSettings(userId);
 
       return {
         data: userSettings,
