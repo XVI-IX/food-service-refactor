@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { PrismaModule } from '../../prisma/prisma.module';
-import { JwtModule } from '@nestjs/jwt';
 import { RepositoriesModule } from 'src/infrastructure/repositories/repositories.module';
 import { UserRepository } from 'src/infrastructure/repositories/user.repository';
 import { ArgonModule } from '../argon/argon.module';

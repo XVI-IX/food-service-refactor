@@ -10,6 +10,7 @@ import { ControllersModule } from './infrastructure/controllers/controllers.modu
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './infrastructure/common/guards/auth.guard';
 import { JwtModule } from '@nestjs/jwt';
+import { JWtTokenModule } from './infrastructure/services/jwt/jwt.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { JwtModule } from '@nestjs/jwt';
     AuthModule,
     ItemModule,
     CustomerModule,
+    JWtTokenModule,
     EventEmitterModule.forRoot({
       global: true,
     }),
