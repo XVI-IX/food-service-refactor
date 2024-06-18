@@ -1,13 +1,6 @@
-import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
-  Logger,
-  UnprocessableEntityException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { ServiceInterface } from '../../../domain/adapters';
 import { CreateTransactionDto } from '../../common/dto';
-import { PrismaService } from '../../prisma/prisma.service';
 import { ITransactionService } from '../../../domain/adapters';
 import { TransactionRepository } from 'src/infrastructure/repositories/transaction.repository';
 
@@ -15,10 +8,7 @@ import { TransactionRepository } from 'src/infrastructure/repositories/transacti
 export class TransactionsService implements ITransactionService {
   private logger: Logger;
 
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly transactionsRepository: TransactionRepository,
-  ) {
+  constructor(private readonly transactionsRepository: TransactionRepository) {
     this.logger = new Logger(TransactionsService.name);
   }
 

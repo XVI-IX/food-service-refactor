@@ -8,7 +8,6 @@ import {
 } from '@nestjs/common';
 import { CreateUserDto } from '../../common/dto/auth/createUser.dto';
 import { PrismaService } from '../../prisma/prisma.service';
-import * as argon from 'argon2';
 import { randomBytes } from 'crypto';
 import { IEmail } from 'src/domain/adapters/email.interface';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -17,11 +16,13 @@ import {
   ResetPasswordDto,
   VerifyEmailDto,
 } from '../../common/dto';
-import { JsonWebTokenError, JwtService } from '@nestjs/jwt';
+import { JsonWebTokenError } from '@nestjs/jwt';
 import { envConfig } from '../../config/environment.config';
 import { ServiceInterface } from '../../../domain/adapters';
-import { IAuthUser } from '../../common/decorators';
 import { UserRepository } from 'src/infrastructure/repositories/user.repository';
+import { ArgonService } from '../argon/argon.service';
+import { JwtTokenService } from '../jwt/jwt.service';
+import { IJwtPayload } from 'src/domain/adapters/jwt.interface';
 
 @Injectable()
 export class AuthService {
@@ -29,8 +30,9 @@ export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly emitter: EventEmitter2,
-    private readonly jwt: JwtService,
+    private readonly jwt: JwtTokenService,
     private readonly userRepository: UserRepository,
+    private readonly argon: ArgonService,
   ) {
     this.logger = new Logger(AuthService.name);
   }
@@ -52,7 +54,7 @@ export class AuthService {
 
   async register(dto: CreateUserDto): Promise<ServiceInterface> {
     try {
-      const passwordHash = await argon.hash(dto.password);
+      const passwordHash = await this.argon.hash(dto.password);
       const verificationToken = this.generateOTP();
 
       const user = await this.userRepository.createUser({
@@ -108,7 +110,7 @@ export class AuthService {
     try {
       const checkExists = await this.userRepository.getUserByEmail(dto.email);
 
-      const checkPassword = await argon.verify(
+      const checkPassword = await this.argon.verify(
         checkExists.password,
         dto.password,
       );
@@ -138,15 +140,12 @@ export class AuthService {
         };
       }
 
-      const payload: IAuthUser = {
+      const payload: IJwtPayload = {
         id: checkExists.id,
         email: checkExists.email,
         roles: [checkExists.role],
       };
-      const token = await this.jwt.signAsync(payload, {
-        secret: envConfig.getJWTSecret(),
-        expiresIn: envConfig.getJwtExpiration(),
-      });
+      const token = this.jwt.generateToken(payload);
 
       delete checkExists.password;
 
@@ -167,15 +166,12 @@ export class AuthService {
     try {
       const checkExists = await this.userRepository.getUserByEmail(email);
 
-      const payload = {
-        sub: checkExists.id,
+      const payload: IJwtPayload = {
+        id: checkExists.id,
         email: checkExists.email,
       };
 
-      const resetToken = await this.jwt.signAsync(payload, {
-        secret: envConfig.getResetSecret(),
-        expiresIn: envConfig.getJwtExpiration(),
-      });
+      const resetToken = this.jwt.generateResetToken(payload);
 
       await this.userRepository.updateResetToken(payload.email, resetToken);
 
@@ -209,9 +205,7 @@ export class AuthService {
         throw new BadRequestException('Token already revoked.');
       }
 
-      const payload = await this.jwt.verifyAsync(token, {
-        secret: envConfig.getResetSecret(),
-      });
+      const payload = await this.jwt.verifyResetToken(token);
 
       if (!payload) {
         throw new JsonWebTokenError('Reset token could not be verified');
@@ -229,16 +223,14 @@ export class AuthService {
       }
 
       if (token === userExists.resetToken) {
-        const tokenValid = await this.jwt.verifyAsync(token, {
-          secret: envConfig.getResetSecret(),
-        });
+        const tokenValid = await this.jwt.verifyResetToken(token);
 
         if (!tokenValid) {
           throw new ForbiddenException('Token expired or invalid');
         }
       }
 
-      const hash = await argon.hash(dto.newPassword);
+      const hash = await this.argon.hash(dto.newPassword);
 
       const updatedUser = await this.userRepository.updateUserPassword({
         email: payload.email,
