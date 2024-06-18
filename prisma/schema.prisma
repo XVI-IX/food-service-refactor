@@ -235,7 +235,7 @@ model transactions {
   storeId         String?            @db.Uuid
   paymentStatus   PaymentStatusEnum? @default(pending)
   amount          Float?             @default(0)
-  transactionType String             @default("trasacio")
+  transactionType String             @default("debit")
   paymentDate     DateTime?
   gatewayResponse Json?
   createdAt       DateTime           @default(now()) @db.Timestamp(6)

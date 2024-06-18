@@ -23,7 +23,7 @@ import { TimeslotRepository } from './timeslot.repository';
     ReviewRepository,
     SettingsRepository,
     StoreRepository,
-    TimeslotRepository
+    TimeslotRepository,
   ],
   exports: [
     CustomerRepository,
@@ -34,7 +34,7 @@ import { TimeslotRepository } from './timeslot.repository';
     ReviewRepository,
     SettingsRepository,
     StoreRepository,
-    TimeslotRepository
+    TimeslotRepository,
   ],
 })
 export class RepositoriesModule {}
