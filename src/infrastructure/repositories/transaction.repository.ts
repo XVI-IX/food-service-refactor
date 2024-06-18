@@ -12,6 +12,23 @@ export class TransactionRepository implements ITransactionRepository {
     this.logger = new Logger(TransactionRepository.name);
   }
 
+  async getOrderTransactions(orderId: string): Promise<TransactionModel[]> {
+    try {
+      const orderTransactions = await this.prisma.transactions.findMany({
+        where: {
+          orderId: orderId,
+        },
+      });
+
+      return orderTransactions;
+    } catch (error) {
+      this.logger.error(error);
+      throw new BadRequestException(
+        'Order transactions could not be retrieved',
+      );
+    }
+  }
+
   async addTransaction(dto: CreateTransactionDto): Promise<TransactionModel> {
     try {
       const transaction = await this.prisma.transactions.create({

@@ -6,5 +6,6 @@ export interface ITransactionRepository {
   getTransactionById(transactionId: string): Promise<TransactionModel>;
   getUserTransactions(userId: string): Promise<TransactionModel[]>;
   getStoreTransactions(storeId: string): Promise<TransactionModel[]>;
+  getOrderTransactions(orderId: string): Promise<TransactionModel[]>;
   addTransaction(dto: CreateTransactionDto): Promise<TransactionModel>;
 }

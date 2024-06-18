@@ -10,6 +10,7 @@ import { ReviewRepository } from './review.repository';
 import { SettingsRepository } from './settings.repository';
 import { StoreRepository } from './store.repository';
 import { TimeslotRepository } from './timeslot.repository';
+import { TransactionRepository } from './transaction.repository';
 
 @Module({
   imports: [PrismaModule],
@@ -24,6 +25,7 @@ import { TimeslotRepository } from './timeslot.repository';
     SettingsRepository,
     StoreRepository,
     TimeslotRepository,
+    TransactionRepository,
   ],
   exports: [
     CustomerRepository,
@@ -35,6 +37,7 @@ import { TimeslotRepository } from './timeslot.repository';
     SettingsRepository,
     StoreRepository,
     TimeslotRepository,
+    TransactionRepository,
   ],
 })
 export class RepositoriesModule {}
