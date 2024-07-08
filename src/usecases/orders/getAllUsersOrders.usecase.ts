@@ -1,14 +1,14 @@
 import { IUseCaseResponse } from 'src/domain/adapters/usecase.response';
 import { OrderRepository } from 'src/infrastructure/repositories/orders.repository';
 
-export class GetOrderItemsUseCaseProxy {
+export class GetAllUsersOrdersUseCase {
   constructor(private readonly orderRepository: OrderRepository) {}
 
-  async getOrderItems(orderId: string): Promise<IUseCaseResponse> {
-    const orderItems = await this.orderRepository.getOrderItems(orderId);
+  async getAllUsersOrders(userId: string): Promise<IUseCaseResponse> {
+    const orders = await this.orderRepository.getAllUserOrders(userId);
 
     return {
-      data: orderItems,
+      data: orders,
     };
   }
 }
