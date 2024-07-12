@@ -5,7 +5,11 @@ import { ReviewRepository } from 'src/infrastructure/repositories/review.reposit
 export class AddItemReviewUseCase {
   constructor(private readonly reviewRepository: ReviewRepository) {}
 
-  async addItemReview(itemId: string, userId: string, dto: CreateItemReviewDto): Promise<IUseCaseResponse> {
+  async addItemReview(
+    itemId: string,
+    userId: string,
+    dto: CreateItemReviewDto,
+  ): Promise<IUseCaseResponse> {
     const item = await this.reviewRepository.addItemReview(itemId, dto, userId);
 
     return {

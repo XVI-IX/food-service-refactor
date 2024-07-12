@@ -8,6 +8,7 @@ import { GetAllItemReviewsUseCase } from 'src/usecases/reviews/getAllItemReviews
 import { GetAllStoreReviewsUseCase } from 'src/usecases/reviews/getAllStoreReviews.usecase';
 import { AddItemReviewUseCase } from 'src/usecases/reviews/addItemReview.usecase';
 import { AddStoreReviewUseCase } from 'src/usecases/reviews/addStoreReview.usecase';
+import { DeleteReviewUseCase } from 'src/usecases/reviews/deleteReview.usecase';
 
 export const REVIEWS_USECASE_CONSTANTS = {
   GET_ALL_REVIEWS: 'GET_ALL_REVIEWS_USECASE_PROXY',
@@ -71,8 +72,15 @@ export class ReviewsUseCaseProxyModule {
         {
           inject: [ReviewRepository],
           provide: ReviewsUseCaseProxyModule.ADD_STORE_REVIEW_USE_CASES_PROXY,
-          useFactory: (reviewRepository: ReviewRepository) => new UseCaseProxy(new AddStoreReviewUseCase(reviewRepository))
-        }
+          useFactory: (reviewRepository: ReviewRepository) =>
+            new UseCaseProxy(new AddStoreReviewUseCase(reviewRepository)),
+        },
+        {
+          inject: [ReviewRepository],
+          provide: ReviewsUseCaseProxyModule.DELETE_REVIEW_USE_CASES_PROXY,
+          useFactory: (reviewRepository: ReviewRepository) =>
+            new UseCaseProxy(new DeleteReviewUseCase(reviewRepository)),
+        },
       ],
     };
   }
