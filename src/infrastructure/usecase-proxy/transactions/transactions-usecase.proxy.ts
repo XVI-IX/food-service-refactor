@@ -7,6 +7,7 @@ import { GetAllTransactionsUseCase } from 'src/usecases/transactions/getAllTrans
 import { GetOrderTransactionsUseCase } from 'src/usecases/transactions/getOrderTransactions.usecase';
 import { GetTransactionByIdUseCase } from 'src/usecases/transactions/getTransactionById.usecase';
 import { GetStoreTransactionsUseCase } from 'src/usecases/transactions/getStoreTransactions.usecase';
+import { GetUserTransactionsUseCase } from 'src/usecases/transactions/getUserTransactions.usecase';
 
 export const TRANSACTIONS_USECASE_CONSTANTS = {
   GET_ORDER_TRANSACTIONS: 'GET_ORDER_TRANSACTIONS_USE_CASE_PROXY',
@@ -78,6 +79,15 @@ export class TransactionsUseCaseProxyModule {
           useFactory: (transactionRepository: TransactionRepository) =>
             new UseCaseProxy(
               new GetTransactionByIdUseCase(transactionRepository),
+            ),
+        },
+        {
+          inject: [TransactionRepository],
+          provide:
+            TransactionsUseCaseProxyModule.GET_USER_TRANSACTIONS_USECASES_PROXY,
+          useFactory: (transactionRepository: TransactionRepository) =>
+            new UseCaseProxy(
+              new GetUserTransactionsUseCase(transactionRepository),
             ),
         },
       ],

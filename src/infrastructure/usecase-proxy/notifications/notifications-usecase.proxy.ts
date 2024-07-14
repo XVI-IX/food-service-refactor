@@ -11,6 +11,7 @@ import { CreateNotificationForUserUseCase } from 'src/usecases/notifications/cre
 import { CreateNotificationForStoreUseCase } from 'src/usecases/notifications/createNotificationForStore.usecase';
 import { DeleteAllNotificationsForUserUseCase } from 'src/usecases/notifications/deleteAllNotificationsForUser.usecase';
 import { DeleteNotificationByIdUseCase } from 'src/usecases/notifications/deleteNotificationById.usecase';
+import { CreateNotificationsForAllUsers } from 'src/usecases/notifications/createNotificationForAllUsers.usecase';
 
 export const NOTIFICATION_USECASE_CONSTANTS = {
   GET_ALL_NOTIFICATIONS: 'GET_ALL_NOTIFICATIONS_USECASE_PROXY',
@@ -135,6 +136,15 @@ export class NotificationsUseCaseProxyModule {
           useFactory: (notificationRepository: NotificationRepository) =>
             new UseCaseProxy(
               new DeleteNotificationByIdUseCase(notificationRepository),
+            ),
+        },
+        {
+          inject: [NotificationRepository],
+          provide:
+            NotificationsUseCaseProxyModule.CREATE_NOTIFICATION_FOR_ALL_USERS_USE_CASES_PROXY,
+          useFactory: (notificationRepository: NotificationRepository) =>
+            new UseCaseProxy(
+              new CreateNotificationsForAllUsers(notificationRepository),
             ),
         },
       ],

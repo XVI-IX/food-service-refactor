@@ -7,6 +7,7 @@ import { GetAllStoresUseCase } from 'src/usecases/stores/getAllStores.usecase';
 import { GetAllUserStoresUseCase } from 'src/usecases/stores/getAllUsersStores.usecase';
 import { UpdateStoreUseCase } from 'src/usecases/stores/updateStore.usecase';
 import { DeleteStoreUseCase } from 'src/usecases/stores/deleteStore.usecase';
+import { GetStoreByIdUseCase } from 'src/usecases/stores/getStoreById.usecase';
 
 export const STORES_USECASE_PROXY = {
   CREATE_STORE: 'CREATE_STORE_USE_CASE_PROXY',
@@ -62,6 +63,12 @@ export class StoresUseCaseProxyModule {
           provide: StoresUseCaseProxyModule.DELETE_STORE_USE_CASES_PROXY,
           useFactory: (storeRepository: StoreRepository) =>
             new UseCaseProxy(new DeleteStoreUseCase(storeRepository)),
+        },
+        {
+          inject: [StoreRepository],
+          provide: StoresUseCaseProxyModule.GET_STORE_BY_ID_USE_CASES_PROXY,
+          useFactory: (storeRepository: StoreRepository) =>
+            new UseCaseProxy(new GetStoreByIdUseCase(storeRepository)),
         },
       ],
 

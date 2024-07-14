@@ -9,6 +9,7 @@ import { GetAllUsersOrdersUseCase } from 'src/usecases/orders/getAllUsersOrders.
 import { GetOrderByIdUseCaseProxy } from 'src/usecases/orders/getOrderById.usecase';
 import { UpdateOrderUseCase } from 'src/usecases/orders/updateOrder.usecase';
 import { ConfirmOrderUseCase } from 'src/usecases/orders/confirmOrder.usecase';
+import { CancelOrderUseCase } from 'src/usecases/orders/cancelOrder.usecase';
 
 export const ORDERS_USECASE_CONSTANTS = {
   CREATE_ORDER: 'CREATE_ORDER_USECASE_PROXY',
@@ -91,6 +92,12 @@ export class OrdersUseCaseProxyModule {
           provide: OrdersUseCaseProxyModule.CONFIRM_ORDER_USE_CASES_PROXY,
           useFactory: (orderRepository: OrderRepository) =>
             new UseCaseProxy(new ConfirmOrderUseCase(orderRepository)),
+        },
+        {
+          inject: [OrderRepository],
+          provide: OrdersUseCaseProxyModule.CANCEL_ORDER_USE_CASES_PROXY,
+          useFactory: (orderRepository: OrderRepository) =>
+            new UseCaseProxy(new CancelOrderUseCase(orderRepository)),
         },
       ],
       exports: [
