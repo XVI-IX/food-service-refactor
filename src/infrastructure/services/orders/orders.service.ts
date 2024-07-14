@@ -13,15 +13,14 @@ import {
   ServiceInterface,
 } from 'src/domain/adapters';
 import { CreateOrderDto, UpdateOrderDto } from '../../common/dto';
-import { envConfig } from '../../config/environment.config';
-import { PrismaService } from '../../prisma/prisma.service';
+import { OrderRepository } from '../../repositories/orders.repository';
 
 @Injectable()
 export class OrderService implements IOrderService {
   private logger: Logger;
 
   constructor(
-    private readonly prisma: PrismaService,
+    private readonly ordersRepository: OrderRepository,
     private readonly eventEmitter: EventEmitter2,
   ) {
     this.logger = new Logger(OrderService.name);
@@ -32,151 +31,27 @@ export class OrderService implements IOrderService {
     dto: CreateOrderDto,
   ): Promise<ServiceInterface> {
     try {
-      const storeExists = await this.prisma.stores.findUnique({
-        where: {
-          id: dto.storeId,
-        },
-      });
+      const order = await this.ordersRepository.createOrder(userId, dto);
 
-      if (!storeExists) {
-        throw new NotFoundException('Store with id not found');
-      }
-
-      const order = await this.prisma.orders.create({
-        data: {
-          user: {
-            connect: {
-              id: userId,
-            },
-          },
-          store: {
-            connect: {
-              id: dto.storeId,
-            },
-          },
-          deliveryLocation: dto.deliveryLocation,
-          deliveryInstructions: dto.deliveryInstructions,
-          subTotalPrice: dto.subTotalPrice,
-          paymentMethod: dto.paymentMethod,
-        },
-      });
-
-      if (!order) {
-        throw new BadRequestException('Order could not be placed');
-      }
-
-      const addOrderHistory = await this.prisma.orderHistory.create({
-        data: {
-          order: {
-            connect: {
-              id: order.id,
-            },
-          },
-          eventType: 'placement',
-          actor: {
-            connect: {
-              id: userId,
-            },
-          },
-        },
-      });
+      const addOrderHistory = await this.ordersRepository.addOrderHistory(
+        order.id,
+        'placement',
+        userId,
+      );
 
       if (!addOrderHistory) {
-        await this.prisma.orders.delete({
-          where: {
-            id: order.id,
-          },
-        });
+        await this.ordersRepository.failedOrder(order.id);
         throw new BadRequestException('Order history could not be recorded');
       }
 
-      const addOrderItems = dto.orderItems.map(async (orderItem) => {
-        try {
-          const findItem = await this.prisma.items.findUnique({
-            where: {
-              id: orderItem.id,
-              storeId: dto.storeId,
-            },
-          });
-
-          if (!findItem) {
-            throw new BadRequestException('Item could not be found in Store');
-          }
-
-          const item = await this.prisma.orderItems.create({
-            data: {
-              order: {
-                connect: {
-                  id: order.id,
-                },
-              },
-              item: {
-                connect: {
-                  id: findItem.id,
-                },
-              },
-              price: findItem.price,
-              quantity: orderItem.quantity,
-            },
-          });
-
-          if (!item) {
-            await this.prisma.orders.update({
-              where: {
-                id: order.id,
-              },
-              data: {
-                deliveryStatus: 'failed',
-              },
-            });
-            throw new BadRequestException('Order item could not be added');
-          }
-        } catch (error) {
-          this.logger.error(error);
-          throw error;
-        }
-      });
-
-      await Promise.all(addOrderItems);
-
-      if (!addOrderItems) {
-        throw new BadRequestException('Order items could not be added');
-      }
-
-      const ordersFinal = await this.prisma.orders.findUnique({
-        where: {
-          id: order.id,
-        },
-        select: {
-          id: true,
-          userId: true,
-          storeId: true,
-          deliveryLocation: true,
-          deliveryStatus: true,
-          orderReference: true,
-          deliveryInstructions: true,
-          subTotalPrice: true,
-          paymentMethod: true,
-          estimatedDeliveryTime: true,
-          promoCode: true,
-          taxAmount: true,
-          deliveryFee: true,
-          orderHistory: true,
-          orderItems: true,
-          transactions: true,
-          feedback: true,
-          rating: true,
-          cancellationReason: true,
-          timeslotId: true,
-        },
-      });
-
-      if (!ordersFinal) {
-        throw new BadRequestException('Order could not be retrieved');
-      }
+      const orderItems = this.ordersRepository.addOrderItems(
+        dto.storeId,
+        dto.orderItems,
+        order.id,
+      );
 
       return {
-        data: ordersFinal,
+        data: orderItems,
       };
     } catch (error) {
       this.logger.error(error);
@@ -186,14 +61,7 @@ export class OrderService implements IOrderService {
 
   async getAllOrders(page: number = 1): Promise<ServiceInterface> {
     try {
-      const orders = await this.prisma.orders.findMany({
-        skip: (page - 1) * envConfig.getPaginationLimit(),
-        take: envConfig.getPaginationLimit(),
-      });
-
-      if (!orders) {
-        throw new InternalServerErrorException('Orders could not be retrieved');
-      }
+      const orders = await this.ordersRepository.getAllOrders(page);
 
       return {
         data: orders,
@@ -210,19 +78,10 @@ export class OrderService implements IOrderService {
     page: number = 1,
   ): Promise<ServiceInterface> {
     try {
-      const userOrders = await this.prisma.orders.findMany({
-        where: {
-          userId: userId,
-        },
-        take: envConfig.getPaginationLimit(),
-        skip: (page - 1) * envConfig.getPaginationLimit(),
-      });
-
-      if (!userOrders) {
-        throw new InternalServerErrorException(
-          'User orders could not be retrieved',
-        );
-      }
+      const userOrders = await this.ordersRepository.getAllUserOrders(
+        userId,
+        page,
+      );
 
       return {
         data: userOrders,
@@ -239,19 +98,10 @@ export class OrderService implements IOrderService {
     page: number = 1,
   ): Promise<ServiceInterface> {
     try {
-      const storeOrders = await this.prisma.orders.findMany({
-        where: {
-          storeId: storeId,
-        },
-        skip: (page - 1) * envConfig.getPaginationLimit(),
-        take: envConfig.getPaginationLimit(),
-      });
-
-      if (!storeOrders) {
-        throw new InternalServerErrorException(
-          'Store orders could not be retrieved',
-        );
-      }
+      const storeOrders = await this.ordersRepository.getAllStoreOrders(
+        storeId,
+        page,
+      );
 
       return {
         data: storeOrders,
@@ -266,26 +116,7 @@ export class OrderService implements IOrderService {
   // TODO: IOrderItems
   async getOrderItems(orderId: string): Promise<ServiceInterface> {
     try {
-      const orderItems = await this.prisma.orderItems.findMany({
-        where: {
-          orderId: orderId,
-        },
-        select: {
-          id: true,
-          item: true,
-          orderId: true,
-          itemId: true,
-          quantity: true,
-          totalItemPrice: true,
-          price: true,
-        },
-      });
-
-      if (!orderItems) {
-        throw new InternalServerErrorException(
-          'Order items could not be retrieved',
-        );
-      }
+      const orderItems = await this.ordersRepository.getOrderItems(orderId);
 
       return {
         data: orderItems,
@@ -298,37 +129,7 @@ export class OrderService implements IOrderService {
 
   async getOrderById(orderId: string): Promise<ServiceInterface> {
     try {
-      const order = await this.prisma.orders.findUnique({
-        where: {
-          id: orderId,
-        },
-        select: {
-          id: true,
-          userId: true,
-          storeId: true,
-          deliveryLocation: true,
-          deliveryStatus: true,
-          orderReference: true,
-          deliveryInstructions: true,
-          subTotalPrice: true,
-          paymentMethod: true,
-          estimatedDeliveryTime: true,
-          promoCode: true,
-          taxAmount: true,
-          deliveryFee: true,
-          orderHistory: true,
-          orderItems: true,
-          transactions: true,
-          feedback: true,
-          rating: true,
-          cancellationReason: true,
-          timeslotId: true,
-        },
-      });
-
-      if (!order) {
-        throw new NotFoundException('Order not found');
-      }
+      const order = await this.ordersRepository.getOrderById(orderId);
 
       return {
         data: order,
@@ -345,59 +146,29 @@ export class OrderService implements IOrderService {
     userId: string,
   ): Promise<ServiceInterface> {
     try {
-      const orderExists = await this.prisma.orders.findUnique({
-        where: {
-          id: orderId,
-        },
-      });
+      const orderExists = await this.ordersRepository.getOrderById(orderId);
 
       if (!orderExists) {
-        throw new BadRequestException('Order does not exist');
+        throw new NotFoundException('Order does not exist');
       }
 
-      const updateOrder = await this.prisma.orders.update({
-        where: {
-          id: orderId,
-        },
-        data: {
-          deliveryLocation: dto.deliveryLocation,
-          deliveryStatus: dto.deliveryStatus,
-          deliveryInstructions: dto.deliveryInstructions,
-          subTotalPrice: dto.subTotalPrice,
-          paymentMethod: dto.paymentMethod,
-          promoCode: dto.promoCode,
-          deliveryFee: dto.deliveryFee,
-          timeslotId: dto.timeslotId,
-        },
-      });
+      const updatedOrder = await this.ordersRepository.updateOrder(
+        orderId,
+        dto,
+      );
 
-      if (!updateOrder) {
-        throw new InternalServerErrorException('Order could not be updated');
-      }
-
-      const orderHistory = await this.prisma.orderHistory.create({
-        data: {
-          order: {
-            connect: {
-              id: orderId,
-            },
-          },
-          eventType: 'modification',
-          actor: {
-            connect: {
-              id: userId,
-            },
-          },
-          details: dto.details,
-        },
-      });
+      const orderHistory = await this.ordersRepository.addOrderHistory(
+        orderId,
+        'modification',
+        userId,
+      );
 
       if (!orderHistory) {
         this.logger.error('Order history could not be saved');
       }
 
       return {
-        data: updateOrder,
+        data: updatedOrder,
       };
     } catch (error) {
       this.logger.error(error);
@@ -407,35 +178,22 @@ export class OrderService implements IOrderService {
 
   async confirmOrder(orderId: string): Promise<ServiceInterface> {
     try {
-      const orderExists = await this.prisma.orders.findUnique({
-        where: {
-          id: orderId,
-          deliveryStatus: {
-            notIn: ['cancelled', 'failed'],
-          },
-        },
-      });
+      const orderExists = await this.ordersRepository.getOrderById(orderId);
 
-      if (!orderExists) {
-        throw new BadRequestException('Order could not be retrieved');
+      if (
+        !orderExists.deliveryStatus.includes('cancellation') ||
+        !orderExists.deliveryStatus.includes('failed')
+      ) {
+        throw new BadRequestException('Order has been cancelled or failed');
       }
 
-      const confirmOrder = await this.prisma.orders.update({
-        where: {
-          id: orderId,
-        },
-        data: {
-          deliveryStatus: 'confirmed',
-        },
-        select: {
-          user: true,
-          id: true,
-        },
-      });
+      const confirmOrder = await this.ordersRepository.confirmOrder(orderId);
 
-      if (!confirmOrder) {
-        throw new BadRequestException('Order could not be confirmed');
-      }
+      await this.ordersRepository.addOrderHistory(
+        orderId,
+        'confirmation',
+        confirmOrder.user.id,
+      );
 
       const emailData: IEmail = {
         to: confirmOrder.user.email,
@@ -465,11 +223,7 @@ export class OrderService implements IOrderService {
     userId: string,
   ): Promise<ServiceInterface> {
     try {
-      const order = await this.prisma.orders.findUnique({
-        where: {
-          id: orderId,
-        },
-      });
+      const order = await this.ordersRepository.getOrderById(orderId);
 
       if (!order) {
         throw new InternalServerErrorException(
@@ -483,36 +237,15 @@ export class OrderService implements IOrderService {
         throw new BadRequestException('Order cannot be cancelled.');
       }
 
-      const cancelledOrder = await this.prisma.orders.update({
-        where: {
-          id: orderId,
-        },
-        data: {
-          deliveryStatus: 'cancelled',
-        },
-      });
-
-      if (!cancelledOrder) {
-        throw new InternalServerErrorException('Order could not be cancelled');
-      }
+      const cancelledOrder = await this.ordersRepository.cancelOrder(orderId);
       // TODO: Check if payment has been charged and reverse bill
       // TODO: Notify user and store that the order has been cancelled
 
-      const orderHistory = await this.prisma.orderHistory.create({
-        data: {
-          eventType: 'cancellation',
-          actor: {
-            connect: {
-              id: userId,
-            },
-          },
-          order: {
-            connect: {
-              id: orderId,
-            },
-          },
-        },
-      });
+      const orderHistory = await this.ordersRepository.addOrderHistory(
+        orderId,
+        'cancellation',
+        userId,
+      );
 
       if (!orderHistory) {
         this.logger.error('Order history could not be saved');

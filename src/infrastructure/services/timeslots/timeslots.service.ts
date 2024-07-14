@@ -1,11 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
-  Logger,
-  NotFoundException,
-  UnprocessableEntityException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import * as moment from 'moment';
 import { ServiceInterface } from '../../../domain/adapters';
@@ -15,6 +8,8 @@ import {
 } from '../../../domain/adapters/timeslot.interface';
 import { CreateTimeslotDto, UpdateTimeslotDto } from '../../common/dto';
 import { PrismaService } from '../../prisma/prisma.service';
+import { TimeslotRepository } from 'src/infrastructure/repositories/timeslot.repository';
+import { OrderRepository } from 'src/infrastructure/repositories/orders.repository';
 
 @Injectable()
 export class TimeslotService implements ITimeslotService {
@@ -23,26 +18,15 @@ export class TimeslotService implements ITimeslotService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly emitter: EventEmitter2,
+    private readonly timeslotRepository: TimeslotRepository,
+    private readonly ordersRepository: OrderRepository,
   ) {
     this.logger = new Logger(TimeslotService.name);
   }
 
   async createTimeslot(dto: CreateTimeslotDto): Promise<ServiceInterface> {
     try {
-      const timeslot = await this.prisma.timeslots.create({
-        data: {
-          startTime: dto.startTime,
-          endTime: dto.endTime,
-          currentCapacity: dto.currentCapacity,
-          orderCount: dto.orderCount,
-          isAvailable: dto.isAvailable,
-          timezone: dto.timezone,
-        },
-      });
-
-      if (!timeslot) {
-        throw new InternalServerErrorException('Timeslot could not be created');
-      }
+      const timeslot = await this.timeslotRepository.createTimeslot(dto);
 
       return {
         data: timeslot,
@@ -55,13 +39,7 @@ export class TimeslotService implements ITimeslotService {
 
   async getAllTimeslots(): Promise<ServiceInterface> {
     try {
-      const timeslots = await this.prisma.timeslots.findMany();
-
-      if (!timeslots) {
-        throw new UnprocessableEntityException(
-          'Timeslots could not be retrieved',
-        );
-      }
+      const timeslots = await this.timeslotRepository.getAllTimeslots();
 
       return {
         data: timeslots,
@@ -74,17 +52,8 @@ export class TimeslotService implements ITimeslotService {
 
   async getTimeslotById(timeslotId: string): Promise<ServiceInterface> {
     try {
-      const timeslot = await this.prisma.timeslots.findUnique({
-        where: {
-          id: timeslotId,
-        },
-      });
-
-      if (!timeslot) {
-        throw new InternalServerErrorException(
-          'Timeslot could not be retrieved',
-        );
-      }
+      const timeslot =
+        await this.timeslotRepository.getTimeslotById(timeslotId);
 
       return {
         data: timeslot,
@@ -100,33 +69,10 @@ export class TimeslotService implements ITimeslotService {
     dto: UpdateTimeslotDto,
   ): Promise<ServiceInterface> {
     try {
-      const timeslotExists = await this.prisma.timeslots.findUnique({
-        where: {
-          id: timeslotId,
-        },
-      });
-
-      if (!timeslotExists) {
-        throw new NotFoundException('Timeslot not found');
-      }
-
-      const timeslot = await this.prisma.timeslots.update({
-        where: {
-          id: timeslotId,
-        },
-        data: {
-          startTime: dto.startTime,
-          endTime: dto.endTime,
-          timezone: dto.timezone,
-          orderCount: dto.orderCount,
-          currentCapacity: dto.currentCapacity,
-          isAvailable: dto.isAvailable,
-        },
-      });
-
-      if (!timeslot) {
-        throw new BadRequestException('Timeslot could not be updated');
-      }
+      const timeslot = await this.timeslotRepository.updateTimeslot(
+        timeslotId,
+        dto,
+      );
 
       return {
         data: timeslot,
@@ -139,15 +85,8 @@ export class TimeslotService implements ITimeslotService {
 
   async deleteTimeslotById(timeslotId: string): Promise<ServiceInterface> {
     try {
-      const timeslot = await this.prisma.timeslots.delete({
-        where: {
-          id: timeslotId,
-        },
-      });
-
-      if (!timeslot) {
-        throw new UnprocessableEntityException('Timeslot could not be deleted');
-      }
+      const timeslot =
+        await this.timeslotRepository.deleteTimeslotById(timeslotId);
 
       return {
         data: timeslot,
@@ -160,16 +99,10 @@ export class TimeslotService implements ITimeslotService {
 
   async deleteAllTimeslots(): Promise<ServiceInterface> {
     try {
-      const timeslots = await this.prisma.timeslots.deleteMany();
-
-      if (!timeslots) {
-        throw new InternalServerErrorException(
-          'Timeslots could not be cleared',
-        );
-      }
+      const timeslots = await this.timeslotRepository.deleteAllTimeslots();
 
       return {
-        data: null,
+        data: timeslots,
       };
     } catch (error) {
       this.logger.error(error);
@@ -179,12 +112,8 @@ export class TimeslotService implements ITimeslotService {
 
   async createDynamicTimeslot(orderId: string): Promise<ServiceInterface> {
     try {
-      const getConfirmedOrder = await this.prisma.orders.findUnique({
-        where: {
-          id: orderId,
-          deliveryStatus: 'confirmed',
-        },
-      });
+      const getConfirmedOrder =
+        await this.ordersRepository.getConfirmedOrder(orderId);
 
       if (!getConfirmedOrder) {
         throw new BadRequestException('Confirmed order could not be retrieved');
@@ -197,101 +126,52 @@ export class TimeslotService implements ITimeslotService {
         .add(2, 'hour')
         .toDate();
 
-      const timeslotExists = await this.prisma.timeslots.findFirst({
-        where: {
-          startTime: oneHourFromConfirmation,
-          endTime: twoHourFromConfirmation,
-          isAvailable: true,
-          currentCapacity: {
-            gt: 0,
-          },
-        },
-      });
+      const timeslotExists = await this.timeslotRepository.checkTimeslotExists(
+        oneHourFromConfirmation,
+        twoHourFromConfirmation,
+      );
 
       if (timeslotExists) {
-        const updateOrder = await this.prisma.orders.update({
-          where: {
-            id: orderId,
-          },
-          data: {
-            timeslot: {
-              connect: {
-                id: timeslotExists.id,
-              },
-            },
-            deliveryStatus: 'in_progress',
-          },
+        const updateOrder = await this.ordersRepository.updateOrder(orderId, {
+          timeslotId: timeslotExists.id,
         });
 
-        if (!updateOrder) {
-          throw new BadRequestException('Order timeslot could not be updated');
-        }
-
-        await this.prisma.timeslots.update({
-          where: {
-            id: timeslotExists.id,
-          },
-          data: {
-            currentCapacity: {
-              decrement: 1,
-            },
-            orderCount: {
-              increment: 1,
-            },
-          },
-        });
+        await this.timeslotRepository.decrementTimeslotCapacity(
+          timeslotExists.id,
+          1,
+          1,
+        );
 
         return {
           data: updateOrder,
         };
       }
 
-      const newTimeslot = await this.prisma.timeslots.create({
-        data: {
-          startTime: moment(getConfirmedOrder.updatedAt)
-            .add(1.5, 'hour')
-            .toDate(),
-          endTime: moment(getConfirmedOrder.updatedAt)
-            .add(2.5, 'hour')
-            .toDate(),
-        },
+      const newTimeslot = await this.timeslotRepository.createTimeslot({
+        startTime: moment(getConfirmedOrder.updatedAt)
+          .add(1.5, 'hour')
+          .toDate(),
+        endTime: moment(getConfirmedOrder.updatedAt).add(2.5, 'hour').toDate(),
       });
 
       if (!newTimeslot) {
         throw new BadRequestException('Timeslot could not be created');
       }
 
-      const updatedOrder = await this.prisma.orders.update({
-        where: {
-          id: orderId,
-        },
-        data: {
-          timeslot: {
-            connect: {
-              id: newTimeslot.id,
-            },
-          },
-          deliveryStatus: 'in_progress',
-        },
+      const updatedOrder = await this.ordersRepository.updateOrder(orderId, {
+        timeslotId: newTimeslot.id,
+        deliveryStatus: 'in_progress',
       });
 
       if (!updatedOrder) {
         throw new BadRequestException('Order timeslot could not be updated');
       }
 
-      await this.prisma.timeslots.update({
-        where: {
-          id: newTimeslot.id,
-        },
-        data: {
-          orderCount: {
-            increment: 1,
-          },
-          currentCapacity: {
-            decrement: 1,
-          },
-        },
-      });
+      await this.timeslotRepository.decrementTimeslotCapacity(
+        newTimeslot.id,
+        1,
+        1,
+      );
 
       return {
         data: updatedOrder,

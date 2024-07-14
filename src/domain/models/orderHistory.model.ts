@@ -1,9 +1,9 @@
 import { BaseModel } from './base.model';
 
 export class OrderHistoryModel extends BaseModel {
-  orderId: number;
+  orderId: string;
   eventType: string;
-  timestamp: string;
-  actorId: number;
+  timestamp: Date | null;
+  actorId: string;
   details?: string;
 }

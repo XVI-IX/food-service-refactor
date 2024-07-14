@@ -1,30 +1,24 @@
-import {
-  BadRequestException,
-  Injectable,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
+import { Injectable, Logger } from '@nestjs/common';
 import {
   INotificationService,
   ServiceInterface,
 } from '../../../domain/adapters';
 import { CreateNotificationDto } from '../../common/dto';
+import { NotificationRepository } from '../../repositories/notification.repository';
 
 @Injectable()
 export class NotificationService implements INotificationService {
   private logger: Logger;
-  constructor(private readonly prisma: PrismaService) {
+  constructor(
+    private readonly notificationsRepository: NotificationRepository,
+  ) {
     this.logger = new Logger(NotificationService.name);
   }
 
   async getAllNotifications(): Promise<ServiceInterface> {
     try {
-      const notifications = await this.prisma.notifications.findMany();
-
-      if (!notifications) {
-        throw new BadRequestException('Notifications could not be retrieved');
-      }
+      const notifications =
+        await this.notificationsRepository.getAllNotifications();
 
       return {
         data: notifications,
@@ -37,17 +31,8 @@ export class NotificationService implements INotificationService {
 
   async getAllStoreNotifications(storeId: string): Promise<ServiceInterface> {
     try {
-      const storeNotifications = await this.prisma.notifications.findMany({
-        where: {
-          storeId: storeId,
-        },
-      });
-
-      if (!storeNotifications) {
-        throw new BadRequestException(
-          'Store Notifications could not be retrieved',
-        );
-      }
+      const storeNotifications =
+        await this.notificationsRepository.getAllStoreNotifications(storeId);
 
       return {
         data: storeNotifications,
@@ -60,17 +45,8 @@ export class NotificationService implements INotificationService {
 
   async getAllUserNotificatons(userId: string): Promise<ServiceInterface> {
     try {
-      const userNotifications = await this.prisma.notifications.findMany({
-        where: {
-          userId: userId,
-        },
-      });
-
-      if (!userNotifications) {
-        throw new BadRequestException(
-          'User notifications could not be retrieved',
-        );
-      }
+      const userNotifications =
+        await this.notificationsRepository.getAllUserNotifications(userId);
 
       return {
         data: userNotifications,
@@ -83,15 +59,8 @@ export class NotificationService implements INotificationService {
 
   async getNotificationById(notificationId: string): Promise<ServiceInterface> {
     try {
-      const notification = await this.prisma.notifications.findUnique({
-        where: {
-          id: notificationId,
-        },
-      });
-
-      if (!notification) {
-        throw new BadRequestException('Notification could not be retrieved');
-      }
+      const notification =
+        await this.notificationsRepository.getNotificationById(notificationId);
 
       return {
         data: notification,
@@ -106,20 +75,10 @@ export class NotificationService implements INotificationService {
     notificationId: string,
   ): Promise<ServiceInterface> {
     try {
-      const notification = await this.prisma.notifications.update({
-        where: {
-          id: notificationId,
-        },
-        data: {
-          read: true,
-        },
-      });
-
-      if (!notification) {
-        throw new BadRequestException(
-          'Notification could not be marked as read',
+      const notification =
+        await this.notificationsRepository.markNotificationAsRead(
+          notificationId,
         );
-      }
 
       return {
         data: notification,
@@ -135,30 +94,11 @@ export class NotificationService implements INotificationService {
     dto: CreateNotificationDto,
   ): Promise<ServiceInterface> {
     try {
-      const userExists = await this.prisma.users.findUnique({
-        where: {
-          id: userId,
-        },
-      });
-
-      if (!userExists) {
-        throw new NotFoundException('User not found');
-      }
-      const notification = await this.prisma.notifications.create({
-        data: {
-          user: {
-            connect: {
-              id: userId,
-            },
-          },
-          title: dto.title,
-          description: dto.description,
-        },
-      });
-
-      if (!notification) {
-        throw new BadRequestException('Notification could not be created');
-      }
+      const notification =
+        await this.notificationsRepository.createNotificationForUser(
+          userId,
+          dto,
+        );
 
       return {
         data: notification,
@@ -174,21 +114,11 @@ export class NotificationService implements INotificationService {
     dto: CreateNotificationDto,
   ): Promise<ServiceInterface> {
     try {
-      const notification = await this.prisma.notifications.create({
-        data: {
-          title: dto.title,
-          description: dto.description,
-          store: {
-            connect: {
-              id: storeId,
-            },
-          },
-        },
-      });
-
-      if (!notification) {
-        throw new BadRequestException('Notification could not be created');
-      }
+      const notification =
+        await this.notificationsRepository.createNotificationForStore(
+          storeId,
+          dto,
+        );
 
       return {
         data: notification,
@@ -199,42 +129,30 @@ export class NotificationService implements INotificationService {
     }
   }
 
-  // async createNotificationsForAllUsers(dto: CreateNotificationDto): Promise<ServiceInterface> {
-  //   try {
-  //     const users = await this.prisma.users.findMany({
-  //       select: {
-  //         id: true
-  //       }
-  //     });
+  async createNotificationsForAllUsers(
+    dto: CreateNotificationDto,
+  ): Promise<ServiceInterface> {
+    try {
+      const notifications =
+        await this.notificationsRepository.createNotificationForAllUsers(dto);
 
-  //     if (!users) {
-  //       throw new BadRequestException('Users could not be retrieved')
-  //     }
-
-  //     // const notification = await this.prisma.notifications.createMany({
-  //     // })
-  //   } catch (error) {
-  //     this.logger.error(error);
-  //     throw error;
-  //   }
-  // }
+      return {
+        data: notifications,
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw error;
+    }
+  }
 
   async deleteAllNotificationsForUser(
     userId: string,
   ): Promise<ServiceInterface> {
     try {
-      const notification = await this.prisma.notifications.deleteMany({
-        where: {
-          userId: userId,
-        },
-      });
-
-      if (!notification) {
-        throw new BadRequestException('Notifications could not be deleted');
-      }
+      const notifications = await this.deleteAllNotificationsForUser(userId);
 
       return {
-        data: notification,
+        data: notifications,
       };
     } catch (error) {
       this.logger.error(error);
@@ -246,15 +164,10 @@ export class NotificationService implements INotificationService {
     notificationId: string,
   ): Promise<ServiceInterface<any>> {
     try {
-      const notification = await this.prisma.notifications.delete({
-        where: {
-          id: notificationId,
-        },
-      });
-
-      if (!notification) {
-        throw new BadRequestException('Notification could not be deleted');
-      }
+      const notification =
+        await this.notificationsRepository.deleteNotificationById(
+          notificationId,
+        );
 
       return {
         data: notification,

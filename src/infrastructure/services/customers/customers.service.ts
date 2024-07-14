@@ -9,13 +9,14 @@ import { ServiceInterface } from '../../../domain/adapters';
 import { ICustomerService } from '../../../domain/adapters/customer.interface';
 import { UpdateCustomerDto } from '../../common/dto';
 import { envConfig } from '../../config/environment.config';
-import { PrismaService } from '../../prisma/prisma.service';
+// import { PrismaService } from '../../prisma/prisma.service';
+import { CustomerRepository } from 'src/infrastructure/repositories/customer.repository';
 
 @Injectable()
 export class CustomerService implements ICustomerService {
   private logger: Logger;
   constructor(
-    private readonly prisma: PrismaService,
+    private readonly customerRepository: CustomerRepository,
     private readonly emitter: EventEmitter2,
   ) {
     this.logger = new Logger(CustomerService.name);
@@ -31,26 +32,7 @@ export class CustomerService implements ICustomerService {
    */
   async getAllCustomers(page: number = 1): Promise<ServiceInterface> {
     try {
-      const customers = await this.prisma.users.findMany({
-        where: {
-          role: 'customer',
-        },
-        skip: (page - 1) * this.PAGINATION_LIMIT,
-        take: this.PAGINATION_LIMIT,
-        select: {
-          id: true,
-          firstName: true,
-          otherName: true,
-          lastName: true,
-          email: true,
-          phone: true,
-          role: true,
-          businessAddress: true,
-          createdAt: true,
-          updatedAt: true,
-          status: true,
-        },
-      });
+      const customers = await this.customerRepository.getAllCustomers(page);
 
       if (!customers) {
         throw new InternalServerErrorException(
@@ -76,27 +58,11 @@ export class CustomerService implements ICustomerService {
    */
   async getCustomerById(customerId: string): Promise<ServiceInterface> {
     try {
-      const customer = await this.prisma.users.findUnique({
-        where: {
-          id: customerId,
-        },
-        select: {
-          id: true,
-          firstName: true,
-          otherName: true,
-          lastName: true,
-          email: true,
-          phone: true,
-          role: true,
-          businessAddress: true,
-          createdAt: true,
-          updatedAt: true,
-          status: true,
-        },
-      });
+      const customer =
+        await this.customerRepository.getCustomerById(customerId);
 
       if (!customer) {
-        throw new NotFoundException('Customer with ID not found');
+        throw new NotFoundException('Customer not found');
       }
 
       return { data: customer };
@@ -118,36 +84,10 @@ export class CustomerService implements ICustomerService {
     dto: UpdateCustomerDto,
   ): Promise<ServiceInterface> {
     try {
-      const customerExists = await this.prisma.users.findUnique({
-        where: {
-          id: customerId,
-          role: 'customer',
-        },
-      });
-
-      if (!customerExists) {
-        throw new NotFoundException('Customer could not be found');
-      }
-
-      const updatedCustomer = await this.prisma.users.update({
-        where: {
-          id: customerId,
-        },
-        data: {
-          firstName: dto.firstName,
-          lastName: dto.lastName,
-          otherName: dto.otherName,
-          phone: dto.phone,
-        },
-        select: {
-          firstName: true,
-          lastName: true,
-          otherName: true,
-          phone: true,
-          createdAt: true,
-          updatedAt: true,
-        },
-      });
+      const updatedCustomer = await this.customerRepository.updateCustomer(
+        customerId,
+        dto,
+      );
 
       if (!updatedCustomer) {
         throw new InternalServerErrorException(
@@ -170,21 +110,8 @@ export class CustomerService implements ICustomerService {
    */
   async deleteCustomer(customerId: string): Promise<ServiceInterface> {
     try {
-      const customerExists = await this.prisma.users.findUnique({
-        where: {
-          id: customerId,
-        },
-      });
-
-      if (!customerExists) {
-        throw new NotFoundException('Customer could not be found');
-      }
-
-      const deletedCustomer = await this.prisma.users.delete({
-        where: {
-          id: customerId,
-        },
-      });
+      const deletedCustomer =
+        await this.customerRepository.deleteCustomer(customerId);
 
       return {
         data: deletedCustomer,

@@ -2,19 +2,21 @@ import {
   Injectable,
   InternalServerErrorException,
   Logger,
-  NotFoundException,
 } from '@nestjs/common';
 import { ServiceInterface } from '../../../domain/adapters';
 import { IItemsService } from '../../../domain/adapters';
 import { CreateItemDto, UpdateItemDto } from '../../common/dto';
-import { envConfig } from '../../config/environment.config';
 import { PrismaService } from '../../prisma/prisma.service';
+import { ItemsRepository } from 'src/infrastructure/repositories/items.repository';
 
 @Injectable()
 export class ItemService implements IItemsService {
   private logger: Logger;
 
-  constructor(private readonly prisma: PrismaService) {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly itemsRepository: ItemsRepository,
+  ) {
     this.logger = new Logger(ItemService.name);
   }
 
@@ -70,14 +72,7 @@ export class ItemService implements IItemsService {
    */
   async getAllItems(page: number = 1): Promise<ServiceInterface> {
     try {
-      const items = await this.prisma.items.findMany({
-        skip: (page - 1) * envConfig.getPaginationLimit(),
-        take: envConfig.getPaginationLimit(),
-      });
-
-      if (!items) {
-        throw new InternalServerErrorException('Items could not be retrieved');
-      }
+      const items = await this.itemsRepository.getAllItems(page);
 
       return {
         data: items,
@@ -101,17 +96,7 @@ export class ItemService implements IItemsService {
     page: number = 1,
   ): Promise<ServiceInterface> {
     try {
-      const items = await this.prisma.items.findMany({
-        where: {
-          storeId: storeId,
-        },
-        skip: (page - 1) * envConfig.getPaginationLimit(),
-        take: envConfig.getPaginationLimit(),
-      });
-
-      if (!items) {
-        throw new InternalServerErrorException('Items could not be retrieved');
-      }
+      const items = await this.itemsRepository.getAllStoreItems(storeId, page);
 
       return {
         data: items,
@@ -131,15 +116,7 @@ export class ItemService implements IItemsService {
    */
   async getItemById(itemId: string): Promise<ServiceInterface> {
     try {
-      const item = await this.prisma.items.findUnique({
-        where: {
-          id: itemId,
-        },
-      });
-
-      if (!item) {
-        throw new NotFoundException('Item not found');
-      }
+      const item = await this.itemsRepository.getItemById(itemId);
 
       return {
         data: item,
@@ -162,26 +139,7 @@ export class ItemService implements IItemsService {
     dto: UpdateItemDto,
   ): Promise<ServiceInterface> {
     try {
-      const checkItemExists = await this.prisma.items.findUnique({
-        where: {
-          id: itemId,
-        },
-      });
-
-      if (!checkItemExists) {
-        throw new NotFoundException('Item not found');
-      }
-
-      const updateItem = await this.prisma.items.update({
-        where: {
-          id: itemId,
-        },
-        data: dto,
-      });
-
-      if (!updateItem) {
-        throw new InternalServerErrorException('Item could not be updated');
-      }
+      const updateItem = await this.itemsRepository.updateItemById(itemId, dto);
 
       return {
         data: updateItem,
@@ -194,25 +152,7 @@ export class ItemService implements IItemsService {
 
   async deleteItem(itemId: string): Promise<ServiceInterface> {
     try {
-      const checkItemExists = await this.prisma.items.findUnique({
-        where: {
-          id: itemId,
-        },
-      });
-
-      if (!checkItemExists) {
-        throw new NotFoundException('Item not found');
-      }
-
-      const item = await this.prisma.items.delete({
-        where: {
-          id: itemId,
-        },
-      });
-
-      if (!item) {
-        throw new InternalServerErrorException('Item could not be deleted');
-      }
+      const item = await this.itemsRepository.deleteItemById(itemId);
 
       return {
         data: item,

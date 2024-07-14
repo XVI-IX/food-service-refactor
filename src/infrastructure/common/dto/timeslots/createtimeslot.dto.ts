@@ -10,26 +10,26 @@ import {
 export class CreateTimeslotDto {
   @IsString()
   @IsNotEmpty()
-  startTime: string;
+  startTime: Date;
 
   @IsString()
   @IsNotEmpty()
-  endTime: string;
+  endTime: Date;
 
   @IsString()
   @IsTimeZone()
   @IsNotEmpty()
-  timezone: string;
+  timezone?: string;
 
   @IsOptional()
   @IsNumber()
-  orderCount: number;
+  orderCount?: number;
 
   @IsOptional()
   @IsNumber()
-  currentCapacity: number;
+  currentCapacity?: number;
 
   @IsBoolean()
   @IsOptional()
-  isAvailable: boolean;
+  isAvailable?: boolean;
 }

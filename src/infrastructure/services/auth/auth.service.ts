@@ -2,14 +2,12 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
-  InternalServerErrorException,
   Logger,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { CreateUserDto } from '../../common/dto/auth/createUser.dto';
 import { PrismaService } from '../../prisma/prisma.service';
-import * as argon from 'argon2';
 import { randomBytes } from 'crypto';
 import { IEmail } from 'src/domain/adapters/email.interface';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -18,11 +16,13 @@ import {
   ResetPasswordDto,
   VerifyEmailDto,
 } from '../../common/dto';
-import { JsonWebTokenError, JwtService } from '@nestjs/jwt';
+import { JsonWebTokenError } from '@nestjs/jwt';
 import { envConfig } from '../../config/environment.config';
 import { ServiceInterface } from '../../../domain/adapters';
-import { users } from '@prisma/client';
-import { IAuthUser } from '../../common/decorators';
+import { UserRepository } from 'src/infrastructure/repositories/user.repository';
+import { ArgonService } from '../argon/argon.service';
+import { JwtTokenService } from '../jwt/jwt.service';
+import { IJwtPayload } from 'src/domain/adapters/jwt.interface';
 
 @Injectable()
 export class AuthService {
@@ -30,7 +30,9 @@ export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly emitter: EventEmitter2,
-    private readonly jwt: JwtService,
+    private readonly jwt: JwtTokenService,
+    private readonly userRepository: UserRepository,
+    private readonly argon: ArgonService,
   ) {
     this.logger = new Logger(AuthService.name);
   }
@@ -43,10 +45,6 @@ export class AuthService {
         },
       });
 
-      // if (!user) {
-      //   throw new NotFoundException('User not found')
-      // }
-
       return user;
     } catch (error) {
       this.logger.error(error);
@@ -54,43 +52,23 @@ export class AuthService {
     }
   }
 
-  async register(dto: CreateUserDto): Promise<ServiceInterface<users>> {
+  async register(dto: CreateUserDto): Promise<ServiceInterface> {
     try {
-      const checkExists = await this.prisma.users.findUnique({
-        where: {
-          email: dto.email,
-        },
-      });
-
-      if (checkExists) {
-        throw new BadRequestException('Email already in use.');
-      }
-
-      const passwordHash = await argon.hash(dto.password);
+      const passwordHash = await this.argon.hash(dto.password);
       const verificationToken = this.generateOTP();
 
-      const user = await this.prisma.users.create({
-        data: {
-          userName: dto.userName,
-          phone: dto.phone,
-          firstName: dto.firstName,
-          otherName: dto.otherName,
-          lastName: dto.lastName,
-          email: dto.email,
-          password: passwordHash,
-          google_id: dto.google_id,
-          role: dto.role,
-          verificationToken: verificationToken,
-        },
+      const user = await this.userRepository.createUser({
+        userName: dto.userName,
+        phone: dto.phone,
+        firstName: dto.firstName,
+        otherName: dto.otherName,
+        lastName: dto.lastName,
+        email: dto.email,
+        password: passwordHash,
+        google_id: dto.google_id,
+        role: dto.role,
+        verificationToken: verificationToken,
       });
-
-      if (!user) {
-        throw new InternalServerErrorException(
-          'User account could not be created',
-        );
-      }
-
-      delete user.password;
 
       const emailData: IEmail = {
         to: user.email,
@@ -115,34 +93,12 @@ export class AuthService {
     }
   }
 
-  async verifyEmail(dto: VerifyEmailDto): Promise<ServiceInterface<null>> {
+  async verifyEmail(dto: VerifyEmailDto): Promise<ServiceInterface> {
     try {
-      const user = await this.prisma.users.findUnique({
-        where: {
-          email: dto.email,
-        },
-      });
-
-      if (!user) {
-        throw new NotFoundException('User with email not found');
-      }
-
-      const verify = await this.prisma.users.update({
-        where: {
-          id: user.id,
-          verificationToken: dto.token,
-        },
-        data: {
-          verified: true,
-        },
-      });
-
-      if (!verify) {
-        throw new BadRequestException('User email could not be verified');
-      }
+      const verify = await this.userRepository.verifyEmail(dto);
 
       return {
-        data: null,
+        data: verify,
       };
     } catch (error) {
       this.logger.error(error);
@@ -150,15 +106,11 @@ export class AuthService {
     }
   }
 
-  async authenticate(dto: LoginUserDto): Promise<ServiceInterface<users>> {
+  async authenticate(dto: LoginUserDto): Promise<ServiceInterface> {
     try {
-      const checkExists = await this.checkUser(dto.email);
+      const checkExists = await this.userRepository.getUserByEmail(dto.email);
 
-      if (!checkExists) {
-        throw new NotFoundException('User with email not found');
-      }
-
-      const checkPassword = await argon.verify(
+      const checkPassword = await this.argon.verify(
         checkExists.password,
         dto.password,
       );
@@ -168,22 +120,9 @@ export class AuthService {
       }
 
       if (!checkExists.verified) {
-        const verificationToken = this.generateOTP();
-
-        const updateToken = await this.prisma.users.update({
-          where: {
-            email: dto.email,
-          },
-          data: {
-            verificationToken: verificationToken,
-          },
-        });
-
-        if (!updateToken) {
-          throw new InternalServerErrorException(
-            'Verification token could not be created',
-          );
-        }
+        const updateToken = await this.userRepository.updateVerificationToken(
+          dto.email,
+        );
 
         const data: IEmail = {
           to: updateToken.email,
@@ -195,25 +134,23 @@ export class AuthService {
 
         this.emitter.emit('sendVerificationTokenEmail', data);
 
-        delete updateToken.password;
-
         return {
-          data: updateToken,
+          message: 'Please verify your email address',
+          data: null,
         };
       }
 
-      const payload: IAuthUser = {
+      const payload: IJwtPayload = {
         id: checkExists.id,
         email: checkExists.email,
         roles: [checkExists.role],
       };
-      const token = await this.jwt.signAsync(payload, {
-        secret: envConfig.getJWTSecret(),
-        expiresIn: envConfig.getJwtExpiration(),
-      });
+      const token = this.jwt.generateToken(payload);
 
       delete checkExists.password;
+
       return {
+        message: 'User authenticated',
         data: {
           ...checkExists,
         },
@@ -227,27 +164,16 @@ export class AuthService {
 
   async forgotPassword(email: string): Promise<ServiceInterface<null>> {
     try {
-      const checkExists = await this.checkUser(email);
+      const checkExists = await this.userRepository.getUserByEmail(email);
 
-      const payload = {
-        sub: checkExists.id,
+      const payload: IJwtPayload = {
+        id: checkExists.id,
         email: checkExists.email,
       };
 
-      const resetToken = await this.jwt.signAsync(payload, {
-        secret: envConfig.getResetSecret(),
-        expiresIn: envConfig.getJwtExpiration(),
-      });
+      const resetToken = this.jwt.generateResetToken(payload);
 
-      await this.prisma.users.update({
-        where: {
-          email: email,
-        },
-        data: {
-          resetToken: resetToken,
-          resetTokenExpiration: envConfig.getJwtExpiration(),
-        },
-      });
+      await this.userRepository.updateResetToken(payload.email, resetToken);
 
       const data: IEmail = {
         to: checkExists.email,
@@ -271,21 +197,15 @@ export class AuthService {
   async resetPassword(
     token: string,
     dto: ResetPasswordDto,
-  ): Promise<ServiceInterface<users>> {
+  ): Promise<ServiceInterface> {
     try {
-      const revokedToken = await this.prisma.revokedToken.findUnique({
-        where: {
-          token: token,
-        },
-      });
+      const revokedToken = await this.userRepository.checkRevokedToken(token);
 
       if (revokedToken) {
         throw new BadRequestException('Token already revoked.');
       }
 
-      const payload = await this.jwt.verifyAsync(token, {
-        secret: envConfig.getResetSecret(),
-      });
+      const payload = await this.jwt.verifyResetToken(token);
 
       if (!payload) {
         throw new JsonWebTokenError('Reset token could not be verified');
@@ -303,44 +223,21 @@ export class AuthService {
       }
 
       if (token === userExists.resetToken) {
-        const tokenValid = await this.jwt.verifyAsync(token, {
-          secret: envConfig.getResetSecret(),
-        });
+        const tokenValid = await this.jwt.verifyResetToken(token);
 
         if (!tokenValid) {
           throw new ForbiddenException('Token expired or invalid');
         }
       }
 
-      const hash = await argon.hash(dto.newPassword);
+      const hash = await this.argon.hash(dto.newPassword);
 
-      const updatedUser = await this.prisma.users.update({
-        where: {
-          email: payload.email,
-        },
-        data: {
-          password: hash,
-          resetToken: null,
-        },
+      const updatedUser = await this.userRepository.updateUserPassword({
+        email: payload.email,
+        hash: hash,
       });
 
-      if (!updatedUser) {
-        throw new BadRequestException(
-          `resetPassword: Password could not be reset`,
-        );
-      }
-
-      delete updatedUser.password;
-
-      const revokeToken = await this.prisma.revokedToken.create({
-        data: {
-          token: token,
-        },
-      });
-
-      if (!revokeToken) {
-        throw new BadRequestException('Token could not be revoked');
-      }
+      await this.userRepository.revokeToken(token);
 
       return {
         data: updatedUser,

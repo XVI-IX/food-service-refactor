@@ -44,6 +44,7 @@ enum OrderEventTypeEnum {
   status_change
   modification
   cancellation
+  confirmation
 }
 
 enum PaymentStatusEnum {
@@ -176,8 +177,8 @@ model orders {
   orderItems            orderItems[]
   transactions          transactions[]
 
-  createdAt             DateTime        @default(now()) @db.Timestamptz(6)
-  updatedAt            DateTime        @default(now()) @updatedAt
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt
 }
 
 model orderHistory {
@@ -234,7 +235,7 @@ model transactions {
   storeId         String?            @db.Uuid
   paymentStatus   PaymentStatusEnum? @default(pending)
   amount          Float?             @default(0)
-  transactionType String             @default("trasacio")
+  transactionType String             @default("debit")
   paymentDate     DateTime?
   gatewayResponse Json?
   createdAt       DateTime           @default(now()) @db.Timestamp(6)
@@ -275,4 +276,7 @@ model reviews {
 
   item   items?  @relation(fields: [itemId], references: [id], onDelete: Cascade)
   itemId String? @db.Uuid
+
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt
 }

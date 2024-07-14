@@ -1,28 +1,19 @@
-import {
-  BadRequestException,
-  Injectable,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { IReviewsService } from '../../../domain/adapters/reviews.interface';
-import { PrismaService } from '../../../infrastructure/prisma/prisma.service';
 import { ServiceInterface } from '../../../domain/adapters/service.interface';
 import { CreateItemReviewDto, CreateStoreReviewDto } from '../../common/dto';
+import { ReviewRepository } from '../../repositories/review.repository';
 
 @Injectable()
 export class ReviewsService implements IReviewsService {
   private logger: Logger;
-  constructor(private readonly prisma: PrismaService) {
+  constructor(private readonly reviewRepository: ReviewRepository) {
     this.logger = new Logger(ReviewsService.name);
   }
 
   async getAllReviews(): Promise<ServiceInterface> {
     try {
-      const reviews = await this.prisma.reviews.findMany();
-
-      if (!reviews) {
-        throw new BadRequestException('Reviews could not be retrieved');
-      }
+      const reviews = await this.reviewRepository.getAllReviews();
 
       return {
         data: reviews,
@@ -35,17 +26,7 @@ export class ReviewsService implements IReviewsService {
 
   async getReviewById(reviewId: string): Promise<ServiceInterface> {
     try {
-      const review = await this.prisma.reviews.findUnique({
-        where: {
-          id: reviewId,
-        },
-      });
-
-      if (!review) {
-        throw new BadRequestException(
-          `Review with id ${reviewId} could not be retrieved`,
-        );
-      }
+      const review = await this.reviewRepository.getReviewById(reviewId);
 
       return {
         data: review,
@@ -62,36 +43,11 @@ export class ReviewsService implements IReviewsService {
     userId: string,
   ): Promise<ServiceInterface> {
     try {
-      const itemExists = await this.prisma.items.findUnique({
-        where: {
-          id: itemId,
-        },
-      });
-
-      if (!itemExists) {
-        throw new NotFoundException('Item could not be found');
-      }
-
-      const review = await this.prisma.reviews.create({
-        data: {
-          item: {
-            connect: {
-              id: itemId,
-            },
-          },
-          content: dto.content,
-          rating: dto.rating,
-          user: {
-            connect: {
-              id: userId,
-            },
-          },
-        },
-      });
-
-      if (!review) {
-        throw new BadRequestException('Review could not be added to item');
-      }
+      const review = await this.reviewRepository.addItemReview(
+        itemId,
+        dto,
+        userId,
+      );
 
       return {
         data: review,
@@ -108,26 +64,11 @@ export class ReviewsService implements IReviewsService {
     userId: string,
   ): Promise<ServiceInterface> {
     try {
-      const review = await this.prisma.reviews.create({
-        data: {
-          store: {
-            connect: {
-              id: storeId,
-            },
-          },
-          content: dto.content,
-          rating: dto.rating,
-          user: {
-            connect: {
-              id: userId,
-            },
-          },
-        },
-      });
-
-      if (!review) {
-        throw new BadRequestException('Store review could not be created');
-      }
+      const review = await this.reviewRepository.addStoreReview(
+        storeId,
+        dto,
+        userId,
+      );
 
       return {
         data: review,
@@ -140,15 +81,7 @@ export class ReviewsService implements IReviewsService {
 
   async getAllItemReviews(itemId: string): Promise<ServiceInterface> {
     try {
-      const itemReviews = await this.prisma.reviews.findMany({
-        where: {
-          itemId: itemId,
-        },
-      });
-
-      if (!itemReviews) {
-        throw new BadRequestException('Item reviews could not be retrieved');
-      }
+      const itemReviews = await this.reviewRepository.getAllItemReviews(itemId);
 
       return {
         data: itemReviews,
@@ -161,15 +94,8 @@ export class ReviewsService implements IReviewsService {
 
   async getAllStoreReviews(storeId: string): Promise<ServiceInterface> {
     try {
-      const storeReviews = await this.prisma.reviews.findMany({
-        where: {
-          storeId: storeId,
-        },
-      });
-
-      if (!storeReviews) {
-        throw new BadRequestException('Store reviews could not be retrieved');
-      }
+      const storeReviews =
+        await this.reviewRepository.getAllStoreReviews(storeId);
 
       return {
         data: storeReviews,
@@ -182,15 +108,7 @@ export class ReviewsService implements IReviewsService {
 
   async deleteReview(reviewId: string): Promise<ServiceInterface> {
     try {
-      const review = this.prisma.reviews.delete({
-        where: {
-          id: reviewId,
-        },
-      });
-
-      if (!review) {
-        throw new BadRequestException('Review could not be deleted');
-      }
+      const review = await this.reviewRepository.deleteReview(reviewId);
 
       return {
         data: review,

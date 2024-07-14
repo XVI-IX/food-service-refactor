@@ -10,27 +10,27 @@ import {
 export class CreateOrderDto {
   @IsNumber()
   @IsNotEmpty()
-  storeId: string;
+  storeId?: string;
 
   @IsNotEmpty()
   @IsString()
-  deliveryLocation: string;
+  deliveryLocation?: string;
 
   @IsNotEmpty()
   @IsString()
-  deliveryStatus: any;
+  deliveryStatus?: any;
 
   @IsNotEmpty()
   @IsString()
-  deliveryInstructions: string;
+  deliveryInstructions?: string;
 
   @IsNotEmpty()
   @IsNumber()
-  subTotalPrice: number;
+  subTotalPrice?: number;
 
   @IsNotEmpty()
   @IsString()
-  paymentMethod: string;
+  paymentMethod?: string;
 
   @IsOptional()
   @IsString()
@@ -42,9 +42,9 @@ export class CreateOrderDto {
 
   @IsNotEmpty()
   @IsNumber()
-  timeslotId: string;
+  timeslotId?: string;
 
   @IsNotEmpty()
   @IsArray()
-  orderItems: any[];
+  orderItems?: any[];
 }
