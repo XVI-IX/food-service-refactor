@@ -75,6 +75,7 @@ export class TransactionRepository implements ITransactionRepository {
       throw new BadRequestException('transactions could not be retrieved');
     }
   }
+
   async getTransactionById(transactionId: string): Promise<TransactionModel> {
     try {
       const transaction = await this.prisma.transactions.findUnique({
