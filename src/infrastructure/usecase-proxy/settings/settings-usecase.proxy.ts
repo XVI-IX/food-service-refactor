@@ -2,13 +2,13 @@ import { Module } from '@nestjs/common';
 import { RepositoriesModule } from 'src/infrastructure/repositories/repositories.module';
 import { SettingsRepository } from 'src/infrastructure/repositories/settings.repository';
 import { UseCaseProxy } from '../usecase-proxy';
-import {
-  GetAllUserSettingsUseCase,
-  GetAllUserSettingsUseCaseProxy,
-} from 'src/usecases/settings/getAllUserSettings.usecase';
+import { GetAllUserSettingsUseCase } from 'src/usecases/settings/getAllUserSettings.usecase';
 import { GetUserSettingsByIdUseCase } from 'src/usecases/settings/getUserSettingsById.usecase';
+import { CreateUserSettingsUseCase } from 'src/usecases/settings/createUserSettings.usecase';
+import { ResetUserSettingsUseCase } from 'src/usecases/settings/resetUserSettings.usecase';
+import { UpdateUserSettingsUseCase } from 'src/usecases/settings/updateUserSettings.usecase';
 
-export const SETTINGS_USECASE_PROXY = {
+export const SETTINGS_USECASE_CONSTANTS = {
   GET_ALL_USER_SETTINGS: 'GET_ALL_USER_SETTINGS_USE_CASE_PROXY',
   GET_USER_SETTINGS_BY_ID: 'GET_USER_SETTINGS_BY_ID_USE_CASE_PROXY',
   UPDATE_USER_SETTINGS: 'UPDATE_USER_SETTINGS_USE_CASE_PROXY',
@@ -49,6 +49,27 @@ export class SettingsUseCaseProxyModule {
             new UseCaseProxy(
               new GetUserSettingsByIdUseCase(settingsRepository),
             ),
+        },
+        {
+          inject: [SettingsRepository],
+          provide:
+            SettingsUseCaseProxyModule.CREATE_USER_SETTINGS_USE_CASES_PROXY,
+          useFactory: (settingsRepository: SettingsRepository) =>
+            new UseCaseProxy(new CreateUserSettingsUseCase(settingsRepository)),
+        },
+        {
+          inject: [SettingsRepository],
+          provide:
+            SettingsUseCaseProxyModule.RESET_USER_SETTINGS_USE_CASE_PROXY,
+          useFactory: (settingsRepository: SettingsRepository) =>
+            new UseCaseProxy(new ResetUserSettingsUseCase(settingsRepository)),
+        },
+        {
+          inject: [SettingsRepository],
+          provide:
+            SettingsUseCaseProxyModule.UPDATE_USER_SETTINGS_USE_CASES_PROXY,
+          useFactory: (settingsRepository: SettingsRepository) =>
+            new UseCaseProxy(new UpdateUserSettingsUseCase(settingsRepository)),
         },
       ],
     };
