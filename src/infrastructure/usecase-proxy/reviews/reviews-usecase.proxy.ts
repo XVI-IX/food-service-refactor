@@ -24,14 +24,15 @@ export const REVIEWS_USECASE_CONSTANTS = {
   imports: [RepositoriesModule],
 })
 export class ReviewsUseCaseProxyModule {
-  static GET_ALL_REVIEWS_USE_CASES_PROXY = 'GetAllReviewsUseCaseProxy';
-  static GET_REVIEW_BY_ID_USE_CASES_PROXY = 'GetReviewByIdUseCaseProxy';
-  static ADD_ITEM_REVIEW_USE_CASES_PROXY = 'AddItemReviewUseCaseProxy';
-  static ADD_STORE_REVIEW_USE_CASES_PROXY = 'AddStoreReviewUseCaseProxy';
-  static GET_ALL_ITEM_REVIEWS_USE_CASES_PROXY = 'GetAllItemReviewsUseCaseProxy';
+  static GET_ALL_REVIEWS_USE_CASES_PROXY = 'GET_ALL_REVIEWS_USE_CASES_PROXY';
+  static GET_REVIEW_BY_ID_USE_CASES_PROXY = 'GET_REVIEW_BY_ID_USE_CASES_PROXY';
+  static ADD_ITEM_REVIEW_USE_CASES_PROXY = 'ADD_ITEM_REVIEW_USE_CASES_PROXY';
+  static ADD_STORE_REVIEW_USE_CASES_PROXY = 'ADD_STORE_REVIEW_USE_CASES_PROXY';
+  static GET_ALL_ITEM_REVIEWS_USE_CASES_PROXY =
+    'GET_ALL_ITEM_REVIEWS_USE_CASES_PROXY';
   static GET_ALL_STORE_REVIEWS_USE_CASES_PROXY =
-    'GetAllStoreReviewsUseCaseProxy';
-  static DELETE_REVIEW_USE_CASES_PROXY = 'DeleteReviewUseCaseProxy';
+    'GET_ALL_STORE_REVIEWS_USE_CASES_PROXY';
+  static DELETE_REVIEW_USE_CASES_PROXY = 'DELETE_REVIEW_USE_CASES_PROXY';
 
   static register() {
     return {
@@ -81,6 +82,15 @@ export class ReviewsUseCaseProxyModule {
           useFactory: (reviewRepository: ReviewRepository) =>
             new UseCaseProxy(new DeleteReviewUseCase(reviewRepository)),
         },
+      ],
+      exports: [
+        ReviewsUseCaseProxyModule.GET_ALL_ITEM_REVIEWS_USE_CASES_PROXY,
+        ReviewsUseCaseProxyModule.GET_REVIEW_BY_ID_USE_CASES_PROXY,
+        ReviewsUseCaseProxyModule.ADD_ITEM_REVIEW_USE_CASES_PROXY,
+        ReviewsUseCaseProxyModule.ADD_STORE_REVIEW_USE_CASES_PROXY,
+        ReviewsUseCaseProxyModule.GET_ALL_STORE_REVIEWS_USE_CASES_PROXY,
+        ReviewsUseCaseProxyModule.GET_ALL_REVIEWS_USE_CASES_PROXY,
+        ReviewsUseCaseProxyModule.DELETE_REVIEW_USE_CASES_PROXY,
       ],
     };
   }

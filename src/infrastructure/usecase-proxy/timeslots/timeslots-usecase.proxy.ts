@@ -22,13 +22,15 @@ export const TIMESLOT_USECASE_CONSTANTS = {
   imports: [RepositoriesModule],
 })
 export class TimeslotUseCaseProxyModule {
-  static CREATE_TIMESLOT_USECASES_PROXY = 'CreateTimeSlotUseCaseProxy';
-  static GET_ALL_TIMESLOTS_USECASES_PROXY = 'GetAllTimeslotsUseCaseProxy';
-  static GET_TIMESLOT_BY_ID_USECASES_PROXY = 'GetTimeslotByIdUseCaseProxy';
-  static UPDATE_TIMESLOT_USECASES_PROXY = 'UpdateTimeslotUseCaseProxy';
+  static CREATE_TIMESLOT_USECASES_PROXY = 'CREATE_TIMESLOT_USECASES_PROXY';
+  static GET_ALL_TIMESLOTS_USECASES_PROXY = 'GET_ALL_TIMESLOTS_USECASES_PROXY';
+  static GET_TIMESLOT_BY_ID_USECASES_PROXY =
+    'GET_TIMESLOT_BY_ID_USECASES_PROXY';
+  static UPDATE_TIMESLOT_USECASES_PROXY = 'UPDATE_TIMESLOT_USECASES_PROXY';
   static DELETE_TIMESLOT_BY_ID_USECASES_PROXY =
-    'DeleteTimeslotByIdUseCaseProxy';
-  static DELETE_ALL_TIMESLOTS_USECASES_PROXY = 'DeleteAllTimeslotsUseCaseProxy';
+    'DELETE_TIMESLOT_BY_ID_USECASES_PROXY';
+  static DELETE_ALL_TIMESLOTS_USECASES_PROXY =
+    'DELETE_ALL_TIMESLOTS_USECASES_PROXY';
 
   static register() {
     return {
@@ -72,6 +74,14 @@ export class TimeslotUseCaseProxyModule {
           useFactory: (timeslotRepository: TimeslotRepository) =>
             new UseCaseProxy(new DeleteAllTimeslotsUseCase(timeslotRepository)),
         },
+      ],
+      exports: [
+        TimeslotUseCaseProxyModule.CREATE_TIMESLOT_USECASES_PROXY,
+        TimeslotUseCaseProxyModule.GET_ALL_TIMESLOTS_USECASES_PROXY,
+        TimeslotUseCaseProxyModule.GET_TIMESLOT_BY_ID_USECASES_PROXY,
+        TimeslotUseCaseProxyModule.UPDATE_TIMESLOT_USECASES_PROXY,
+        TimeslotUseCaseProxyModule.DELETE_TIMESLOT_BY_ID_USECASES_PROXY,
+        TimeslotUseCaseProxyModule.DELETE_ALL_TIMESLOTS_USECASES_PROXY,
       ],
     };
   }

@@ -22,10 +22,10 @@ export const AUTH_USECASE_CONSTANTS = {
   imports: [JWtTokenModule, ArgonModule, RepositoriesModule],
 })
 export class AuthUseCaseProxyModule {
-  static REGISTER_USE_CASES_PROXY = 'RegisterUseCasesProxy';
-  static LOGIN_USE_CASES_PROXY = 'LoginUseCasesProxy';
-  static FORGOT_PASSWORD_USE_CASES_PROXY = 'ForgotPasswordUseCasesProxy';
-  static RESET_PASSWORD_USE_CASES_PROXY = 'ResetPasswordUseCasesProxy';
+  static REGISTER_USE_CASES_PROXY = 'REGISTER_USE_CASES_PROXY';
+  static LOGIN_USE_CASES_PROXY = 'LOGIN_USE_CASES_PROXY';
+  static FORGOT_PASSWORD_USE_CASES_PROXY = 'FORGOT_PASSWORD_USE_CASES_PROXY';
+  static RESET_PASSWORD_USE_CASES_PROXY = 'RESET_PASSWORD_USE_CASES_PROXY';
 
   static register() {
     return {
@@ -67,6 +67,13 @@ export class AuthUseCaseProxyModule {
               new ResetPasswordUseCasesProxy(userRepository, argon, jwt),
             ),
         },
+      ],
+
+      exports: [
+        AuthUseCaseProxyModule.REGISTER_USE_CASES_PROXY,
+        AuthUseCaseProxyModule.LOGIN_USE_CASES_PROXY,
+        AuthUseCaseProxyModule.FORGOT_PASSWORD_USE_CASES_PROXY,
+        AuthUseCaseProxyModule.RESET_PASSWORD_USE_CASES_PROXY,
       ],
     };
   }

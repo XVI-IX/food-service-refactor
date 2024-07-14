@@ -21,14 +21,15 @@ export const SETTINGS_USECASE_CONSTANTS = {
 })
 export class SettingsUseCaseProxyModule {
   static GET_ALL_USER_SETTINGS_USE_CASES_PROXY =
-    'GetAllUserSettingsUseCaseProxy';
+    'GET_ALL_USER_SETTINGS_USE_CASES_PROXY';
   static GET_USER_SETTINGS_BY_ID_USE_CASES_PROXY =
-    'GetUserSettingsByIdUseCaseProxy';
+    'GET_USER_SETTINGS_BY_ID_USE_CASES_PROXY';
   static UPDATE_USER_SETTINGS_USE_CASES_PROXY =
-    'UpdateUserSettingsUseCaseProxy';
+    'UPDATE_USER_SETTINGS_USE_CASES_PROXY';
   static CREATE_USER_SETTINGS_USE_CASES_PROXY =
-    'CreateUserSettingsUseCaseProxy';
-  static RESET_USER_SETTINGS_USE_CASE_PROXY = 'ResetUserSettingsUseCaseProxy';
+    'CREATE_USER_SETTINGS_USE_CASES_PROXY';
+  static RESET_USER_SETTINGS_USE_CASE_PROXY =
+    'RESET_USER_SETTINGS_USE_CASE_PROXY';
 
   static register() {
     return {
@@ -71,6 +72,13 @@ export class SettingsUseCaseProxyModule {
           useFactory: (settingsRepository: SettingsRepository) =>
             new UseCaseProxy(new UpdateUserSettingsUseCase(settingsRepository)),
         },
+      ],
+      exports: [
+        SettingsUseCaseProxyModule.GET_ALL_USER_SETTINGS_USE_CASES_PROXY,
+        SettingsUseCaseProxyModule.GET_USER_SETTINGS_BY_ID_USE_CASES_PROXY,
+        SettingsUseCaseProxyModule.UPDATE_USER_SETTINGS_USE_CASES_PROXY,
+        SettingsUseCaseProxyModule.CREATE_USER_SETTINGS_USE_CASES_PROXY,
+        SettingsUseCaseProxyModule.RESET_USER_SETTINGS_USE_CASE_PROXY,
       ],
     };
   }

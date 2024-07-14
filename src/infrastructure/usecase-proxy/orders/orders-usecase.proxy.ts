@@ -26,15 +26,17 @@ export const ORDERS_USECASE_CONSTANTS = {
   imports: [RepositoriesModule],
 })
 export class OrdersUseCaseProxyModule {
-  static CREATE_ORDER_USE_CASES_PROXY = 'CreateOrderUseCaseProxy';
-  static GET_ALL_ORDERS_USE_CASES_PROXY = 'GetAllOrdersUseCaseProxy';
-  static GET_ALL_USERS_ORDERS_USE_CASES_PROXY = 'GetAllUsersOrdersUseCaseProxy';
-  static GET_ALL_STORE_ORDERS_USE_CASES_PROXY = 'GetAllStoreOrdersUseCaseProxy';
-  static GET_ORDER_ITEMS_USE_CASES_PROXY = 'GetOrderItemsUseCaseProxy';
-  static GET_ORDER_BY_ID_USE_CASES_PROXY = 'GetOrderByIdUseCaseProxy';
-  static UPDATE_ORDER_USE_CASES_PROXY = 'UpdateOrderUseCaseProxy';
-  static CONFIRM_ORDER_USE_CASES_PROXY = 'ConfirmOrderUseCaseProxy';
-  static CANCEL_ORDER_USE_CASES_PROXY = 'CancelOrderUseCaseProxy';
+  static CREATE_ORDER_USE_CASES_PROXY = 'CREATE_ORDER_USE_CASES_PROXY';
+  static GET_ALL_ORDERS_USE_CASES_PROXY = 'GET_ALL_ORDERS_USE_CASES_PROXY';
+  static GET_ALL_USERS_ORDERS_USE_CASES_PROXY =
+    'GET_ALL_USERS_ORDERS_USE_CASES_PROXY';
+  static GET_ALL_STORE_ORDERS_USE_CASES_PROXY =
+    'GET_ALL_STORE_ORDERS_USE_CASES_PROXY';
+  static GET_ORDER_ITEMS_USE_CASES_PROXY = 'GET_ORDER_ITEMS_USE_CASES_PROXY';
+  static GET_ORDER_BY_ID_USE_CASES_PROXY = 'GET_ORDER_BY_ID_USE_CASES_PROXY';
+  static UPDATE_ORDER_USE_CASES_PROXY = 'UPDATE_ORDER_USE_CASES_PROXY';
+  static CONFIRM_ORDER_USE_CASES_PROXY = 'CONFIRM_ORDER_USE_CASES_PROXY';
+  static CANCEL_ORDER_USE_CASES_PROXY = 'CANCEL_ORDER_USE_CASES_PROXY';
 
   static register() {
     return {
@@ -90,6 +92,17 @@ export class OrdersUseCaseProxyModule {
           useFactory: (orderRepository: OrderRepository) =>
             new UseCaseProxy(new ConfirmOrderUseCase(orderRepository)),
         },
+      ],
+      exports: [
+        OrdersUseCaseProxyModule.CREATE_ORDER_USE_CASES_PROXY,
+        OrdersUseCaseProxyModule.GET_ALL_ORDERS_USE_CASES_PROXY,
+        OrdersUseCaseProxyModule.GET_ALL_USERS_ORDERS_USE_CASES_PROXY,
+        OrdersUseCaseProxyModule.GET_ALL_STORE_ORDERS_USE_CASES_PROXY,
+        OrdersUseCaseProxyModule.GET_ORDER_ITEMS_USE_CASES_PROXY,
+        OrdersUseCaseProxyModule.GET_ORDER_BY_ID_USE_CASES_PROXY,
+        OrdersUseCaseProxyModule.UPDATE_ORDER_USE_CASES_PROXY,
+        OrdersUseCaseProxyModule.CONFIRM_ORDER_USE_CASES_PROXY,
+        OrdersUseCaseProxyModule.CANCEL_ORDER_USE_CASES_PROXY,
       ],
     };
   }

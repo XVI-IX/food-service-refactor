@@ -22,12 +22,14 @@ export const ITEMS_USECASE_CONSTANTS = {
   imports: [RepositoriesModule],
 })
 export class ItemsUseCaseProxyModule {
-  static GET_ALL_ITEMS_USE_CASES_PROXY = 'GetAllItemsUseCasesProxy';
-  static GET_ITEM_BY_ID_USE_CASES_PROXY = 'GetItemByIdUseCaseProxy';
-  static UPDATE_ITEM_USE_CASES_PROXY = 'UpdateItemUseCaseProxy';
-  static DELETE_ITEM_USE_CASES_PROXY = 'DeleteItemUseCaseProxy';
-  static GET_ALL_STORE_ITEMS = 'GetAllStoreItemsUseCaseProxy';
-  static ADD_ITEM_TO_STORE = 'AddItemToStoreUseCaseProxy';
+  static GET_ALL_ITEMS_USE_CASES_PROXY = 'GET_ALL_ITEMS_USE_CASES_PROXY';
+  static GET_ITEM_BY_ID_USE_CASES_PROXY = 'GET_ITEM_BY_ID_USE_CASES_PROXY';
+  static UPDATE_ITEM_USE_CASES_PROXY = 'UPDATE_ITEM_USE_CASES_PROXY';
+  static DELETE_ITEM_USE_CASES_PROXY = 'DELETE_ITEM_USE_CASES_PROXY';
+  static GET_ALL_STORE_ITEMS_USE_CASES_PROXY =
+    'GET_ALL_STORE_ITEMS_USE_CASES_PROXY';
+  static ADD_ITEM_TO_STORE_USE_CASES_PROXY =
+    'ADD_ITEM_TO_STORE_USE_CASES_PROXY';
 
   static register() {
     return {
@@ -59,16 +61,24 @@ export class ItemsUseCaseProxyModule {
         },
         {
           inject: [ItemsRepository],
-          provide: ItemsUseCaseProxyModule.ADD_ITEM_TO_STORE,
+          provide: ItemsUseCaseProxyModule.ADD_ITEM_TO_STORE_USE_CASES_PROXY,
           useFactory: (itemsRepository: ItemsRepository) =>
             new UseCaseProxy(new AddItemToStoreUseCase(itemsRepository)),
         },
         {
           inject: [ItemsRepository],
-          provide: ItemsUseCaseProxyModule.GET_ALL_STORE_ITEMS,
+          provide: ItemsUseCaseProxyModule.GET_ALL_STORE_ITEMS_USE_CASES_PROXY,
           useFactory: (itemsRepository: ItemsRepository) =>
             new UseCaseProxy(new getAllStoreItemsUseCase(itemsRepository)),
         },
+      ],
+      exports: [
+        ItemsUseCaseProxyModule.GET_ALL_ITEMS_USE_CASES_PROXY,
+        ItemsUseCaseProxyModule.GET_ITEM_BY_ID_USE_CASES_PROXY,
+        ItemsUseCaseProxyModule.UPDATE_ITEM_USE_CASES_PROXY,
+        ItemsUseCaseProxyModule.ADD_ITEM_TO_STORE_USE_CASES_PROXY,
+        ItemsUseCaseProxyModule.DELETE_ITEM_USE_CASES_PROXY,
+        ItemsUseCaseProxyModule.GET_ALL_STORE_ITEMS_USE_CASES_PROXY,
       ],
     };
   }

@@ -32,25 +32,25 @@ export const NOTIFICATION_USECASE_CONSTANTS = {
 })
 export class NotificationsUseCaseProxyModule {
   static GET_ALL_NOTIFICATIONS_USE_CASES_PROXY =
-    'GetAllNotificationsUseCaseProxy';
+    'GET_ALL_NOTIFICATIONS_USE_CASES_PROXY';
   static GET_NOTIFICATION_BY_ID_USE_CASES_PROXY =
-    'GetNotificationByIdUseCaseProxy';
+    'GET_NOTIFICATION_BY_ID_USE_CASES_PROXY';
   static GET_ALL_USERS_NOTIFICATIONS_USE_CASES_PROXY =
-    'GetAllUsersNotificationsUseCaseProxy';
+    'GET_ALL_USERS_NOTIFICATIONS_USE_CASES_PROXY';
   static GET_ALL_STORE_NOTIFICATIONS_USE_CASES_PROXY =
-    'GetAllStoreNotificationsUseCaseProxy';
+    'GET_ALL_STORE_NOTIFICATIONS_USE_CASES_PROXY';
   static MARK_NOTIFICATION_AS_READ_USE_CASE_PROXY =
-    'MarkNotificationAsReadUseCaseProxy';
+    'MARK_NOTIFICATION_AS_READ_USE_CASE_PROXY';
   static CREATE_NOTIFICATION_FOR_USER_USE_CASES_PROXY =
-    'CreateNotificationForUserUseCaseProxy';
+    'CREATE_NOTIFICATION_FOR_USER_USE_CASES_PROXY';
   static CREATE_NOTIFICATION_FOR_STORE_USE_CASES_PROXY =
-    'CreateNotificationForStoreUseCaseProxy';
+    'CREATE_NOTIFICATION_FOR_STORE_USE_CASES_PROXY';
   static DELETE_ALL_NOTIFICATIONS_FOR_USER_USE_CASES_PROXY =
-    'DeleteAllNotificationsForUserUseCaseProxy';
+    'DELETE_ALL_NOTIFICATIONS_FOR_USER_USE_CASES_PROXY';
   static DELETE_NOTIFICATION_BY_ID_USE_CASES_PROXY =
-    'DeleteNotificationByIdUseCaseProxy';
+    'DELETE_NOTIFICATION_BY_ID_USE_CASES_PROXY';
   static CREATE_NOTIFICATION_FOR_ALL_USERS_USE_CASES_PROXY =
-    'CreateNotificationForAllUsersUseCaseProxy';
+    'CREATE_NOTIFICATION_FOR_ALL_USERS_USE_CASES_PROXY';
 
   static register() {
     return {
@@ -137,6 +137,18 @@ export class NotificationsUseCaseProxyModule {
               new DeleteNotificationByIdUseCase(notificationRepository),
             ),
         },
+      ],
+      exports: [
+        NotificationsUseCaseProxyModule.GET_ALL_NOTIFICATIONS_USE_CASES_PROXY,
+        NotificationsUseCaseProxyModule.GET_NOTIFICATION_BY_ID_USE_CASES_PROXY,
+        NotificationsUseCaseProxyModule.GET_ALL_USERS_NOTIFICATIONS_USE_CASES_PROXY,
+        NotificationsUseCaseProxyModule.GET_ALL_STORE_NOTIFICATIONS_USE_CASES_PROXY,
+        NotificationsUseCaseProxyModule.MARK_NOTIFICATION_AS_READ_USE_CASE_PROXY,
+        NotificationsUseCaseProxyModule.CREATE_NOTIFICATION_FOR_ALL_USERS_USE_CASES_PROXY,
+        NotificationsUseCaseProxyModule.CREATE_NOTIFICATION_FOR_STORE_USE_CASES_PROXY,
+        NotificationsUseCaseProxyModule.CREATE_NOTIFICATION_FOR_USER_USE_CASES_PROXY,
+        NotificationsUseCaseProxyModule.DELETE_ALL_NOTIFICATIONS_FOR_USER_USE_CASES_PROXY,
+        NotificationsUseCaseProxyModule.DELETE_NOTIFICATION_BY_ID_USE_CASES_PROXY,
       ],
     };
   }

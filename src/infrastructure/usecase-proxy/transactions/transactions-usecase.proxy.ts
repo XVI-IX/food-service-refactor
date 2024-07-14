@@ -21,12 +21,17 @@ export const TRANSACTIONS_USECASE_CONSTANTS = {
   imports: [RepositoriesModule],
 })
 export class TransactionsUseCaseProxyModule {
-  static GET_ORDER_TRANSACTIONS_USECASES_PROXY: 'GetOrderTransactionsUseCaseProxy';
-  static ADD_TRANSACTION_USECASES_PROXY: 'AddTransactionUseCaseProxy';
-  static GET_ALL_TRANSACTIONS_USECASES_PROXY: 'GetAllTransactionsUseCaseProxy';
-  static GET_TRANSACTION_BY_ID_USECASES_PROXY: 'GetTransactionByIdUseCaseProxy';
-  static GET_USER_TRANSACTIONS_USECASES_PROXY: 'GetUserTransactionsUseCaseProxy';
-  static GET_STORE_TRANSACTIONS_USECASES_PROXY: 'GetStoreTransactionsUseCaseProxy';
+  static GET_ORDER_TRANSACTIONS_USECASES_PROXY =
+    'GET_ORDER_TRANSACTIONS_USECASES_PROXY';
+  static ADD_TRANSACTION_USECASES_PROXY = 'ADD_TRANSACTION_USECASES_PROXY';
+  static GET_ALL_TRANSACTIONS_USECASES_PROXY =
+    'GET_ALL_TRANSACTIONS_USECASES_PROXY';
+  static GET_TRANSACTION_BY_ID_USECASES_PROXY =
+    'GET_TRANSACTION_BY_ID_USECASES_PROXY';
+  static GET_USER_TRANSACTIONS_USECASES_PROXY =
+    'GET_USER_TRANSACTIONS_USECASES_PROXY';
+  static GET_STORE_TRANSACTIONS_USECASES_PROXY =
+    'GET_STORE_TRANSACTIONS_USECASES_PROXY';
 
   static register() {
     return {
@@ -75,6 +80,14 @@ export class TransactionsUseCaseProxyModule {
               new GetTransactionByIdUseCase(transactionRepository),
             ),
         },
+      ],
+      exports: [
+        TransactionsUseCaseProxyModule.GET_ORDER_TRANSACTIONS_USECASES_PROXY,
+        TransactionsUseCaseProxyModule.ADD_TRANSACTION_USECASES_PROXY,
+        TransactionsUseCaseProxyModule.GET_ALL_TRANSACTIONS_USECASES_PROXY,
+        TransactionsUseCaseProxyModule.GET_TRANSACTION_BY_ID_USECASES_PROXY,
+        TransactionsUseCaseProxyModule.GET_USER_TRANSACTIONS_USECASES_PROXY,
+        TransactionsUseCaseProxyModule.GET_STORE_TRANSACTIONS_USECASES_PROXY,
       ],
     };
   }

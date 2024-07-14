@@ -18,10 +18,12 @@ export const CUSTOMER_USECASE_CONSTANTS = {
   imports: [RepositoriesModule],
 })
 export class CustomerUseCaseProxyModule {
-  static GET_ALL_CUSTOMERS_USE_CASES_PROXY = 'GetAllCustomersUseCasesProxy';
-  static GET_CUSTOMER_BY_ID_USE_CASES_PROXY = 'GetCustomerByIdUseCaseProxy';
-  static UPDATE_CUSTOMER_USE_CASES_PROXY = 'UpdateCustomerUseCaseProxy';
-  static DELETE_CUSTOMER_USE_CASES_PROXY = 'DeleteCustomerUseCaseProxy';
+  static GET_ALL_CUSTOMERS_USE_CASES_PROXY =
+    'GET_ALL_CUSTOMERS_USE_CASES_PROXY';
+  static GET_CUSTOMER_BY_ID_USE_CASES_PROXY =
+    'GET_CUSTOMER_BY_ID_USE_CASES_PROXY';
+  static UPDATE_CUSTOMER_USE_CASES_PROXY = 'UPDATE_CUSTOMER_USE_CASES_PROXY';
+  static DELETE_CUSTOMER_USE_CASES_PROXY = 'DELETE_CUSTOMER_USE_CASES_PROXY';
 
   static register() {
     return {
@@ -52,6 +54,12 @@ export class CustomerUseCaseProxyModule {
           useFactory: (customerRepository: CustomerRepository) =>
             new UseCaseProxy(new DeleteCustomerUseCase(customerRepository)),
         },
+      ],
+      exports: [
+        CustomerUseCaseProxyModule.GET_ALL_CUSTOMERS_USE_CASES_PROXY,
+        CustomerUseCaseProxyModule.GET_CUSTOMER_BY_ID_USE_CASES_PROXY,
+        CustomerUseCaseProxyModule.UPDATE_CUSTOMER_USE_CASES_PROXY,
+        CustomerUseCaseProxyModule.DELETE_CUSTOMER_USE_CASES_PROXY,
       ],
     };
   }
