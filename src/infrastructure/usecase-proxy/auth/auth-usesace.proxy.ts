@@ -43,11 +43,8 @@ export class AuthUseCaseProxyModule {
         {
           inject: [UserRepository, ArgonService],
           provide: AuthUseCaseProxyModule.REGISTER_USE_CASES_PROXY,
-          useFactory: (
-            jwt: JwtTokenService,
-            argon: ArgonService,
-            userRepository: UserRepository,
-          ) => new UseCaseProxy(new RegisterUseCase(userRepository)),
+          useFactory: (argon: ArgonService, userRepository: UserRepository) =>
+            new UseCaseProxy(new RegisterUseCase(userRepository, argon)),
         },
         {
           inject: [UserRepository, JwtTokenService],
