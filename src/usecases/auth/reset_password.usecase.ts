@@ -1,13 +1,14 @@
+import { IArgonService } from 'src/domain/adapters/argon.interface';
+import { IJwtService } from 'src/domain/adapters/jwt.interface';
+import { IUserRepository } from 'src/domain/repositories/user-repository.interface';
 import { ResetPasswordDto } from 'src/infrastructure/common/dto';
-import { UserRepository } from 'src/infrastructure/repositories/user.repository';
-import { ArgonService } from 'src/infrastructure/services/argon/argon.service';
-import { JwtTokenService } from 'src/infrastructure/services/jwt/jwt.service';
+
 
 export class ResetPasswordUseCasesProxy {
   constructor(
-    private readonly userRepository: UserRepository,
-    private readonly argon: ArgonService,
-    private readonly jwt: JwtTokenService,
+    private readonly userRepository: IUserRepository,
+    private readonly argon: IArgonService,
+    private readonly jwt: IJwtService,
   ) {}
 
   async resetPassword(token: string, dto: ResetPasswordDto) {

@@ -1,9 +1,9 @@
 import { IUseCaseResponse } from 'src/domain/adapters/usecase.response';
+import { IItemsRepository } from 'src/domain/repositories/items-repository.interface';
 import { CreateItemDto } from 'src/infrastructure/common/dto';
-import { ItemsRepository } from 'src/infrastructure/repositories/items.repository';
 
 export class AddItemToStoreUseCase {
-  constructor(private readonly itemsRepository: ItemsRepository) {}
+  constructor(private readonly itemsRepository: IItemsRepository) {}
 
   async addItemToStore(
     storeId: string,

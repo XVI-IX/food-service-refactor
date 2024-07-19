@@ -1,8 +1,8 @@
 import { IUseCaseResponse } from 'src/domain/adapters/usecase.response';
-import { ItemsRepository } from 'src/infrastructure/repositories/items.repository';
+import { IItemsRepository } from 'src/domain/repositories/items-repository.interface';
 
 export class GetAllItemsUseCase {
-  constructor(private readonly itemsRepository: ItemsRepository) {}
+  constructor(private readonly itemsRepository: IItemsRepository) {}
 
   async getAllItems(): Promise<IUseCaseResponse> {
     const items = await this.itemsRepository.getAllItems();

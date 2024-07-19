@@ -1,9 +1,9 @@
+import { INotificationsRepository } from 'src/domain/repositories/notifications-repository.interface';
 import { CreateNotificationDto } from 'src/infrastructure/common/dto';
-import { NotificationRepository } from 'src/infrastructure/repositories/notification.repository';
 
 export class CreateNotificationForUserUseCase {
   constructor(
-    private readonly notificationRepository: NotificationRepository,
+    private readonly notificationRepository: INotificationsRepository,
   ) {}
 
   async createNotificationForUser(userId: string, dto: CreateNotificationDto) {

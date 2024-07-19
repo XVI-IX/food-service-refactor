@@ -1,10 +1,10 @@
 import { IUseCaseResponse } from 'src/domain/adapters/usecase.response';
+import { INotificationsRepository } from 'src/domain/repositories/notifications-repository.interface';
 import { CreateNotificationDto } from 'src/infrastructure/common/dto';
-import { NotificationRepository } from 'src/infrastructure/repositories/notification.repository';
 
 export class CreateNotificationForStoreUseCase {
   constructor(
-    private readonly notificationRepository: NotificationRepository,
+    private readonly notificationRepository: INotificationsRepository,
   ) {}
 
   async createNotificationForStore(
