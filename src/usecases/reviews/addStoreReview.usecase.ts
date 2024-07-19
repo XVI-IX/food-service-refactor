@@ -1,8 +1,8 @@
+import { IReviewRepository } from 'src/domain/repositories/review-repository.interface';
 import { CreateStoreReviewDto } from 'src/infrastructure/common/dto';
-import { ReviewRepository } from 'src/infrastructure/repositories/review.repository';
 
 export class AddStoreReviewUseCase {
-  constructor(private readonly reviewRepository: ReviewRepository) {}
+  constructor(private readonly reviewRepository: IReviewRepository) {}
 
   async addStoreReview(
     storeId: string,

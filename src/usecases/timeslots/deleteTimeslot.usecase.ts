@@ -1,8 +1,8 @@
 import { IUseCaseResponse } from 'src/domain/adapters/usecase.response';
-import { TimeslotRepository } from 'src/infrastructure/repositories/timeslot.repository';
+import { ITimeslotRepository } from 'src/domain/repositories/timeslot-repository.interface';
 
 export class DeleteTimeslotByIdUseCase {
-  constructor(private readonly timeslotRepository: TimeslotRepository) {}
+  constructor(private readonly timeslotRepository: ITimeslotRepository) {}
 
   async deleteTimeslotById(timeslotId: string): Promise<IUseCaseResponse> {
     const timeslot =
