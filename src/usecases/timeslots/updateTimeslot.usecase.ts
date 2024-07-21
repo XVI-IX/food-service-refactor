@@ -1,9 +1,9 @@
 import { IUseCaseResponse } from 'src/domain/adapters/usecase.response';
+import { ITimeslotRepository } from 'src/domain/repositories/timeslot-repository.interface';
 import { UpdateTimeslotDto } from 'src/infrastructure/common/dto';
-import { TimeslotRepository } from 'src/infrastructure/repositories/timeslot.repository';
 
 export class UpdateTimeslotUseCase {
-  constructor(private readonly timeslotRepository: TimeslotRepository) {}
+  constructor(private readonly timeslotRepository: ITimeslotRepository) {}
 
   async updateTimeslot(
     timeslotId: string,

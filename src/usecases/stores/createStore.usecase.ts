@@ -1,10 +1,10 @@
 import { IUseCaseResponse } from 'src/domain/adapters/usecase.response';
+import { IStoreRepository } from 'src/domain/repositories/store-repository.interface';
 import { IAuthUser } from 'src/infrastructure/common/decorators';
 import { CreateStoreDto } from 'src/infrastructure/common/dto';
-import { StoreRepository } from 'src/infrastructure/repositories/store.repository';
 
 export class CreateStoreUseCase {
-  constructor(private readonly storeRepository: StoreRepository) {}
+  constructor(private readonly storeRepository: IStoreRepository) {}
 
   async createStore(
     user: IAuthUser,

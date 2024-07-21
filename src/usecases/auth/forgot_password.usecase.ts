@@ -1,12 +1,11 @@
-import { IJwtPayload } from 'src/domain/adapters/jwt.interface';
+import { IJwtPayload, IJwtService } from 'src/domain/adapters/jwt.interface';
 import { IUseCaseResponse } from 'src/domain/adapters/usecase.response';
-import { UserRepository } from 'src/infrastructure/repositories/user.repository';
-import { JwtTokenService } from 'src/infrastructure/services/jwt/jwt.service';
+import { IUserRepository } from 'src/domain/repositories/user-repository.interface';
 
 export class ForgotPasswordUseCase {
   constructor(
-    private readonly userRepository: UserRepository,
-    private readonly jwt: JwtTokenService,
+    private readonly userRepository: IUserRepository,
+    private readonly jwt: IJwtService,
   ) {}
 
   async forgotPassword(email: string): Promise<IUseCaseResponse> {

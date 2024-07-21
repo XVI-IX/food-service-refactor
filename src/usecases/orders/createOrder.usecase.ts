@@ -1,9 +1,9 @@
 import { IUseCaseResponse } from 'src/domain/adapters/usecase.response';
+import { IOrderRepository } from 'src/domain/repositories/order-repository.interface';
 import { CreateOrderDto } from 'src/infrastructure/common/dto';
-import { OrderRepository } from 'src/infrastructure/repositories/orders.repository';
 
 export class CreateOrderUseCase {
-  constructor(private readonly orderRepository: OrderRepository) {}
+  constructor(private readonly orderRepository: IOrderRepository) {}
 
   async createOrder(
     userId: string,

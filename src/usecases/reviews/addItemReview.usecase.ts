@@ -1,9 +1,9 @@
 import { IUseCaseResponse } from 'src/domain/adapters/usecase.response';
+import { IReviewRepository } from 'src/domain/repositories/review-repository.interface';
 import { CreateItemReviewDto } from 'src/infrastructure/common/dto';
-import { ReviewRepository } from 'src/infrastructure/repositories/review.repository';
 
 export class AddItemReviewUseCase {
-  constructor(private readonly reviewRepository: ReviewRepository) {}
+  constructor(private readonly reviewRepository: IReviewRepository) {}
 
   async addItemReview(
     itemId: string,

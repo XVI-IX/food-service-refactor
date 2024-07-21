@@ -1,8 +1,8 @@
 import { IUseCaseResponse } from 'src/domain/adapters/usecase.response';
-import { SettingsRepository } from 'src/infrastructure/repositories/settings.repository';
+import { ISettingsRepository } from 'src/domain/repositories/settings-repository.interface';
 
 export class ResetUserSettingsUseCase {
-  constructor(private readonly settingsRepository: SettingsRepository) {}
+  constructor(private readonly settingsRepository: ISettingsRepository) {}
 
   async resetUserSettings(userId: string): Promise<IUseCaseResponse> {
     const settings = await this.settingsRepository.resetUserSettings(userId);

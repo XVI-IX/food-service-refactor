@@ -1,8 +1,8 @@
 import { IUseCaseResponse } from 'src/domain/adapters/usecase.response';
-import { TransactionRepository } from 'src/infrastructure/repositories/transaction.repository';
+import { ITransactionRepository } from 'src/domain/repositories/transaction-repository.interface';
 
 export class GetStoreTransactionsUseCase {
-  constructor(private readonly transactionRepository: TransactionRepository) {}
+  constructor(private readonly transactionRepository: ITransactionRepository) {}
 
   async getStoreTransactions(storeId: string): Promise<IUseCaseResponse> {
     const transactions =
